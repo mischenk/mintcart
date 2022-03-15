@@ -11,11 +11,13 @@ contract Product is ERC1155, Ownable {
 
     //===== Mutable state ======
     Counters.Counter private tokenIds;
+    string public name;
     string public baseUri;
 
     struct ProductItem {
         uint256 tokenId;
-        address payable owner;
+        string metadataHash;
+        address payable seller;
         uint256 price;
         uint256 amount;
         uint256 sold;
@@ -27,32 +29,36 @@ contract Product is ERC1155, Ownable {
 
     event ProductItemCreated(
         uint256 indexed tokenId,
-        address owner,
+        string metadataHash,
+        address seller,
         uint256 price,
         uint256 amount
     );
 
     //===== Constructor ======
-    constructor(string memory _baseUri) ERC1155(_baseUri) {
+    constructor(string memory _name, string memory _baseUri) ERC1155(_baseUri) {
+        name = _name;
         baseUri = _baseUri;
     }
 
-    function createProduct(uint256 price, uint256 amount)
-        external
-        returns (uint256)
-    {
+    function createProduct(
+        string memory metadataHash,
+        uint256 price,
+        uint256 amount
+    ) external returns (uint256) {
         tokenIds.increment();
         uint256 newTokenId = tokenIds.current();
 
         _mint(msg.sender, newTokenId, amount, "");
 
-        createProductItem(newTokenId, price, amount);
+        createProductItem(newTokenId, metadataHash, price, amount);
 
         return newTokenId;
     }
 
     function createProductItem(
         uint256 tokenId,
+        string memory metadataHash,
         uint256 price,
         uint256 amount
     ) private {
@@ -61,13 +67,20 @@ contract Product is ERC1155, Ownable {
 
         idToProductItem[tokenId] = ProductItem(
             tokenId,
+            metadataHash,
             payable(msg.sender),
             price,
             amount,
             0
         );
 
-        emit ProductItemCreated(tokenId, msg.sender, price, amount);
+        emit ProductItemCreated(
+            tokenId,
+            metadataHash,
+            msg.sender,
+            price,
+            amount
+        );
     }
 
     function fetchProducts() public view returns (ProductItem[] memory) {
@@ -76,7 +89,7 @@ contract Product is ERC1155, Ownable {
         uint256 currentIndex = 0;
 
         for (uint256 i = 1; i <= totalItemCount; i++) {
-            if (idToProductItem[i].owner == msg.sender) {
+            if (idToProductItem[i].seller == msg.sender) {
                 itemCount++;
             }
         }
@@ -84,7 +97,7 @@ contract Product is ERC1155, Ownable {
         ProductItem[] memory items = new ProductItem[](itemCount);
 
         for (uint256 i = 1; i <= itemCount; i++) {
-            if (idToProductItem[i].owner == msg.sender) {
+            if (idToProductItem[i].seller == msg.sender) {
                 items[currentIndex] = idToProductItem[i];
                 currentIndex++;
             }
@@ -93,10 +106,17 @@ contract Product is ERC1155, Ownable {
         return items;
     }
 
+    function buy(uint256 tokenId, uint256 amount) external payable {
+        require(
+            idToProductItem[tokenId].sold < idToProductItem[tokenId].amount,
+            "Product is sold out"
+        );
+        idToProductItem[tokenId].sold += 1;
+
+        safeTransferFrom(address(this), msg.sender, tokenId, amount, "");
+    }
+
     function uri(uint256 tokenId) public view override returns (string memory) {
-        return
-            string(
-                abi.encodePacked(baseUri, Strings.toString(tokenId), ".json")
-            );
+        return idToProductItem[tokenId].metadataHash;
     }
 }

@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 import { styled } from "@stitches/react";
 import { ethers } from "ethers";
+import { create as ipfsHttpClient } from "ipfs-http-client";
 
 import { useSigner, Web3Provider } from "../../context/Web3Context";
 import Layout from "../../components/Layout";
@@ -8,19 +9,39 @@ import Layout from "../../components/Layout";
 import { productAddress } from "../../../config";
 import Product from "../../../artifacts/contracts/Product.sol/Product.json";
 
+const client = ipfsHttpClient("https://ipfs.infura.io:5001/api/v0");
+
 const CreateProductContent = () => {
   const router = useRouter();
   const signer = useSigner();
 
+  async function uploadToIPFS(title, description) {
+    const data = JSON.stringify({
+      title,
+      description,
+    });
+
+    try {
+      const added = await client.add(data);
+      return added.path;
+    } catch (error) {
+      console.log("Error uploading file: ", error);
+    }
+  }
+
   const onSubmit = async (ev) => {
     ev.preventDefault();
 
-    const price = ev.target.price.value;
-    const amount = ev.target.amount.value;
+    const { title, description, price, amount } = ev.target;
+    const metadataHash = await uploadToIPFS(title.value, description.value);
+    const priceEther = ethers.utils.parseUnits(price.value, "ether");
 
     const contract = new ethers.Contract(productAddress, Product.abi, signer);
-
-    const tx = await contract.createProduct(price, amount);
+    const tx = await contract.createProduct(
+      metadataHash,
+      priceEther,
+      amount.value
+    );
     await tx.wait();
 
     router.push("/products");
@@ -30,13 +51,7 @@ const CreateProductContent = () => {
     <Form onSubmit={onSubmit}>
       <InputGroup>
         <Label htmlFor="title">Title</Label>
-        <Input
-          id="title"
-          name="title"
-          type="text"
-          placeholder="Title..."
-          required
-        />
+        <Input id="title" name="title" type="text" required />
       </InputGroup>
 
       <InputGroup>
@@ -44,8 +59,7 @@ const CreateProductContent = () => {
         <Textarea
           id="description"
           name="description"
-          placeholder="Description..."
-          required
+          placeholder="Add a escription to your product"
         />
       </InputGroup>
 

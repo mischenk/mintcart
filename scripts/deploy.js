@@ -3,7 +3,10 @@ const fs = require("fs");
 
 async function main() {
   const Product = await hre.ethers.getContractFactory("Product");
-  const product = await Product.deploy("https://ipfs.io/ipfs/1234/");
+  const product = await Product.deploy(
+    "NFT Products",
+    "https://ipfs.infura.io/ipfs/"
+  );
 
   await product.deployed();
 
