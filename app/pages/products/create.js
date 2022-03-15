@@ -1,13 +1,33 @@
-import { useSigner, Web3Provider } from "../../context/Web3Context";
+import { useRouter } from "next/router";
 import { styled } from "@stitches/react";
 import { ethers } from "ethers";
 
+import { useSigner, Web3Provider } from "../../context/Web3Context";
 import Layout from "../../components/Layout";
 
+import { productFactoryAddress } from "../../../config";
+import ProductFactory from "../../../artifacts/contracts/ProductFactory.sol/ProductFactory.json";
+
 const CreateProductContent = () => {
-  const onSubmit = async (event) => {
-    event.preventDefault();
-    const signer = useSigner();
+  const router = useRouter();
+  const signer = useSigner();
+
+  const onSubmit = async (ev) => {
+    ev.preventDefault();
+
+    const price = ev.target.price.value;
+    const amount = ev.target.amount.value;
+
+    const contract = new ethers.Contract(
+      productFactoryAddress,
+      ProductFactory.abi,
+      signer
+    );
+
+    const tx = await contract.createProduct(price, amount);
+    await tx.wait();
+
+    router.push("/products");
   };
 
   return (
@@ -45,10 +65,10 @@ const CreateProductContent = () => {
         />
       </InputGroup>
       <InputGroup>
-        <Label htmlFor="quantity">Quantity</Label>
+        <Label htmlFor="amount">Quantity</Label>
         <Input
-          id="quantity"
-          name="quantity"
+          id="amount"
+          name="amount"
           type="number"
           min="0"
           placeholder="Quantity"
@@ -57,16 +77,6 @@ const CreateProductContent = () => {
       </InputGroup>
       <Button type="submit">Create product</Button>
     </form>
-  );
-};
-
-const CreateProduct = () => {
-  return (
-    <Web3Provider>
-      <Layout pageTitle="Create a product">
-        <CreateProductContent />
-      </Layout>
-    </Web3Provider>
   );
 };
 
@@ -106,5 +116,15 @@ const Button = styled("button", {
   borderRadius: "10px",
   boxShadow: "none",
 });
+
+const CreateProduct = () => {
+  return (
+    <Web3Provider>
+      <Layout pageTitle="Create a product">
+        <CreateProductContent />
+      </Layout>
+    </Web3Provider>
+  );
+};
 
 export default CreateProduct;

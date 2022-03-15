@@ -1,12 +1,11 @@
-import Layout from "../components/Layout";
+import { styled } from "@stitches/react";
+
 import { Web3Provider } from "../context/Web3Context";
 
+import Layout from "../components/Layout";
+
 const HomeContent = () => {
-  return (
-    <div>
-      <button>Try it out</button>
-    </div>
-  );
+  return <div />;
 };
 
 const Home = () => {

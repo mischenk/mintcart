@@ -1,12 +1,22 @@
 const hre = require("hardhat");
+const fs = require("fs");
 
 async function main() {
-  const Product = await hre.ethers.getContractFactory("Product");
-  const product = await Product.deploy();
+  const ProductFactory = await hre.ethers.getContractFactory("ProductFactory");
+  const productFactory = await ProductFactory.deploy(
+    "https://ipfs.io/ipfs/1234/"
+  );
 
-  await product.deployed();
+  await productFactory.deployed();
 
-  console.log("Product deployed to:", product.address);
+  console.log("ProductFactory deployed to:", productFactory.address);
+
+  fs.writeFileSync(
+    "./config.js",
+    `
+  export const productFactoryAddress = "${productFactory.address}"
+  `
+  );
 }
 
 main()
