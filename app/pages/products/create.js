@@ -5,8 +5,8 @@ import { ethers } from "ethers";
 import { useSigner, Web3Provider } from "../../context/Web3Context";
 import Layout from "../../components/Layout";
 
-import { productFactoryAddress } from "../../../config";
-import ProductFactory from "../../../artifacts/contracts/ProductFactory.sol/ProductFactory.json";
+import { productAddress } from "../../../config";
+import Product from "../../../artifacts/contracts/Product.sol/Product.json";
 
 const CreateProductContent = () => {
   const router = useRouter();
@@ -18,11 +18,7 @@ const CreateProductContent = () => {
     const price = ev.target.price.value;
     const amount = ev.target.amount.value;
 
-    const contract = new ethers.Contract(
-      productFactoryAddress,
-      ProductFactory.abi,
-      signer
-    );
+    const contract = new ethers.Contract(productAddress, Product.abi, signer);
 
     const tx = await contract.createProduct(price, amount);
     await tx.wait();
@@ -31,7 +27,7 @@ const CreateProductContent = () => {
   };
 
   return (
-    <form onSubmit={onSubmit}>
+    <Form onSubmit={onSubmit}>
       <InputGroup>
         <Label htmlFor="title">Title</Label>
         <Input
@@ -76,9 +72,13 @@ const CreateProductContent = () => {
         />
       </InputGroup>
       <Button type="submit">Create product</Button>
-    </form>
+    </Form>
   );
 };
+
+const Form = styled("form", {
+  maxWidth: "800px",
+});
 
 const InputGroup = styled("div", {
   paddingBottom: "1rem",

@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { ethers } from "ethers";
 import { useState, useEffect } from "react";
+import { styled } from "@stitches/react";
 
 import Layout from "../../components/Layout";
 import { useSigner, Web3Provider } from "../../context/Web3Context";
 
-import { productFactoryAddress } from "../../../config";
-import ProductFactory from "../../../artifacts/contracts/ProductFactory.sol/ProductFactory.json";
+import { productAddress } from "../../../config";
+import Product from "../../../artifacts/contracts/Product.sol/Product.json";
 
 const ProductsContent = () => {
   const [products, setProducts] = useState([]);
@@ -17,19 +18,16 @@ const ProductsContent = () => {
       return;
     }
 
-    const productFactory = new ethers.Contract(
-      productFactoryAddress,
-      ProductFactory.abi,
-      signer
-    );
+    const product = new ethers.Contract(productAddress, Product.abi, signer);
 
-    const data = await productFactory.fetchProducts();
-    console.log("data", data);
+    const data = await product.fetchProducts();
     const products = await Promise.all(
       data.map(async (i) => {
-        const price = ethers.utils.formatUnits(i.price.toString(), "ether");
+        const price = ethers.utils.formatUnits(i.price.toString(), "wei");
+        const amount = i.amount.toString();
         return {
           price,
+          amount,
         };
       })
     );
@@ -41,7 +39,14 @@ const ProductsContent = () => {
 
   return (
     <div>
-      <ul>{products.map((p) => p.price)}</ul>
+      <ProductList>
+        {products.map((p) => (
+          <ProductItem>
+            <div>Price: {p.price}</div>
+            <div>Quantity: {p.amount}</div>
+          </ProductItem>
+        ))}
+      </ProductList>
       <div>
         <Link href="/products/create" passHref>
           <button>Create new product</button>
@@ -51,10 +56,19 @@ const ProductsContent = () => {
   );
 };
 
+const ProductList = styled("ul", {
+  listStyle: "none",
+  padding: 0,
+});
+
+const ProductItem = styled("li", {
+  marginBottom: "1rem",
+});
+
 const Products = () => {
   return (
     <Web3Provider>
-      <Layout pageTitle="Products">
+      <Layout pageTitle="Your products">
         <ProductsContent />
       </Layout>
     </Web3Provider>

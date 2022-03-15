@@ -108,7 +108,6 @@ const Tab = ({ children, to }) => {
 };
 
 const PageContent = styled("div", {
-  maxWidth: "1100px",
   backgoundColor: "#f7f7f7",
   padding: `${PAGE_MARGIN}px`,
 });
