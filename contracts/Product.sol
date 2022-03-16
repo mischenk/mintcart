@@ -2,11 +2,12 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
-contract Product is ERC1155, Ownable {
+contract Product is ERC1155, ERC1155Holder, Ownable {
     using Counters for Counters.Counter;
 
     //===== Mutable state ======
@@ -74,6 +75,8 @@ contract Product is ERC1155, Ownable {
             0
         );
 
+        safeTransferFrom(msg.sender, address(this), tokenId, amount, "");
+
         emit ProductItemCreated(
             tokenId,
             metadataHash,
@@ -84,6 +87,18 @@ contract Product is ERC1155, Ownable {
     }
 
     function fetchProducts() public view returns (ProductItem[] memory) {
+        uint256 totalItemCount = tokenIds.current();
+
+        ProductItem[] memory items = new ProductItem[](totalItemCount);
+
+        for (uint256 i = 0; i < totalItemCount; i++) {
+            items[i] = idToProductItem[i + 1];
+        }
+
+        return items;
+    }
+
+    function fetchSellerProducts() public view returns (ProductItem[] memory) {
         uint256 totalItemCount = tokenIds.current();
         uint256 itemCount = 0;
         uint256 currentIndex = 0;
@@ -106,17 +121,41 @@ contract Product is ERC1155, Ownable {
         return items;
     }
 
+    function fetchProduct(uint256 tokenId)
+        external
+        view
+        returns (ProductItem memory)
+    {
+        return idToProductItem[tokenId];
+    }
+
     function buy(uint256 tokenId, uint256 amount) external payable {
+        ProductItem memory p = idToProductItem[tokenId];
+        uint256 amountLeft = p.amount - p.sold;
+
         require(
-            idToProductItem[tokenId].sold < idToProductItem[tokenId].amount,
+            p.sold < idToProductItem[tokenId].amount,
             "Product is sold out"
         );
+        require(msg.value >= p.price, "Error, product costs more");
+        require(amount <= amountLeft, "Amount to big");
+
         idToProductItem[tokenId].sold += 1;
 
-        safeTransferFrom(address(this), msg.sender, tokenId, amount, "");
+        _safeTransferFrom(address(this), msg.sender, tokenId, amount, "");
     }
 
     function uri(uint256 tokenId) public view override returns (string memory) {
         return idToProductItem[tokenId].metadataHash;
+    }
+
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(ERC1155, ERC1155Receiver)
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
     }
 }

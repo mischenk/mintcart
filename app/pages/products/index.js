@@ -21,16 +21,16 @@ const ProductsContent = () => {
 
     const product = new ethers.Contract(productAddress, Product.abi, signer);
 
-    const data = await product.fetchProducts();
+    const data = await product.fetchSellerProducts();
     const products = await Promise.all(
       data.map(async (i) => {
         const meta = await axios.get(
           `https://ipfs.infura.io/ipfs/${i.metadataHash}`
         );
+        const title = meta ? meta.data.title : null;
         const tokenId = i.tokenId;
         const price = ethers.utils.formatUnits(i.price.toString(), "ether");
         const amount = i.amount.toString();
-        const title = meta ? meta.data.title : null;
         return {
           tokenId,
           title,
@@ -47,23 +47,36 @@ const ProductsContent = () => {
 
   return (
     <div>
-      <ProductList>
-        {products.map((p) => (
-          <ProductItem key={p.tokenId}>
-            <ProductTitle>{p.title}</ProductTitle>
-            <ProductDetails>
-              <div>Price: {p.price} eth</div>
-              <div>Quantity: {p.amount}</div>
-              <Link href={`/products/${p.tokenId}`}>View</Link>
-            </ProductDetails>
-          </ProductItem>
-        ))}
-      </ProductList>
-      <div>
-        <Link href="/products/create" passHref>
-          <button>Create New Product</button>
-        </Link>
-      </div>
+      {products.length ? (
+        <>
+          <ProductList>
+            {products.map((p) => (
+              <Link href={`/products/${p.tokenId}`} key={p.tokenId}>
+                <a>
+                  <ProductItem>
+                    <ProductTitle>{p.title}</ProductTitle>
+                    <ProductDetails>
+                      <div>Price: {p.price} eth</div>
+                      <div>Quantity: {p.amount}</div>
+                    </ProductDetails>
+                  </ProductItem>
+                </a>
+              </Link>
+            ))}
+          </ProductList>
+          <div>
+            <Link href="/products/create" passHref>
+              <button>Create New Product</button>
+            </Link>
+          </div>
+        </>
+      ) : (
+        <div>
+          <Link href="/products/create" passHref>
+            <button>Create Your First Product</button>
+          </Link>
+        </div>
+      )}
     </div>
   );
 };
