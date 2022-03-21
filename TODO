@@ -1,6 +1,14 @@
-buy product page
-add theme styling
-add UI components
+change checkout page route: /seller-address/product-name
+add product status: mint after creation
+edit product
+delete product
+title -> name
+add switch account event listener
+add wallet modal
+add image
+
+use signature request for log in
+add icons
 
 deploy in mumbai
 deploy on vercel

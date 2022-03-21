@@ -40,10 +40,15 @@ export const Web3Provider = ({ children }) => {
   const web3Modal = useRef();
 
   const switchAccount = useCallback(
-    async (provider, accounts) => {
-      setAddress(accounts[0]);
-      //const d = await provider.lookupAddress(accounts[0]);
-      //setDisplayAddress(d);
+    (provider, accounts) => {
+      const addr = accounts[0];
+      setAddress(addr);
+      provider
+        .lookupAddress(addr)
+        .then((d) => setDisplayAddress(d))
+        .catch((error) => {
+          setDisplayAddress(`${addr.slice(0, 6)}...${addr.slice(-4)}`);
+        });
     },
     [setAddress, setDisplayAddress]
   );

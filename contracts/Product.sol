@@ -19,6 +19,7 @@ contract Product is ERC1155, ERC1155Holder, Ownable {
         uint256 tokenId;
         string metadataHash;
         address payable seller;
+        string slug;
         uint256 price;
         uint256 amount;
         uint256 sold;
@@ -32,6 +33,7 @@ contract Product is ERC1155, ERC1155Holder, Ownable {
         uint256 indexed tokenId,
         string metadataHash,
         address seller,
+        string slug,
         uint256 price,
         uint256 amount
     );
@@ -44,6 +46,7 @@ contract Product is ERC1155, ERC1155Holder, Ownable {
 
     function createProduct(
         string memory metadataHash,
+        string memory slug,
         uint256 price,
         uint256 amount
     ) external returns (uint256) {
@@ -52,7 +55,7 @@ contract Product is ERC1155, ERC1155Holder, Ownable {
 
         _mint(msg.sender, newTokenId, amount, "");
 
-        createProductItem(newTokenId, metadataHash, price, amount);
+        createProductItem(newTokenId, metadataHash, slug, price, amount);
 
         return newTokenId;
     }
@@ -60,6 +63,7 @@ contract Product is ERC1155, ERC1155Holder, Ownable {
     function createProductItem(
         uint256 tokenId,
         string memory metadataHash,
+        string memory slug,
         uint256 price,
         uint256 amount
     ) private {
@@ -70,6 +74,7 @@ contract Product is ERC1155, ERC1155Holder, Ownable {
             tokenId,
             metadataHash,
             payable(msg.sender),
+            slug,
             price,
             amount,
             0
@@ -81,6 +86,7 @@ contract Product is ERC1155, ERC1155Holder, Ownable {
             tokenId,
             metadataHash,
             msg.sender,
+            slug,
             price,
             amount
         );
@@ -98,13 +104,17 @@ contract Product is ERC1155, ERC1155Holder, Ownable {
         return items;
     }
 
-    function fetchSellerProducts() public view returns (ProductItem[] memory) {
+    function fetchSellerProducts(address _seller)
+        public
+        view
+        returns (ProductItem[] memory)
+    {
         uint256 totalItemCount = tokenIds.current();
         uint256 itemCount = 0;
         uint256 currentIndex = 0;
 
         for (uint256 i = 1; i <= totalItemCount; i++) {
-            if (idToProductItem[i].seller == msg.sender) {
+            if (idToProductItem[i].seller == _seller) {
                 itemCount++;
             }
         }
@@ -112,7 +122,7 @@ contract Product is ERC1155, ERC1155Holder, Ownable {
         ProductItem[] memory items = new ProductItem[](itemCount);
 
         for (uint256 i = 1; i <= itemCount; i++) {
-            if (idToProductItem[i].seller == msg.sender) {
+            if (idToProductItem[i].seller == _seller) {
                 items[currentIndex] = idToProductItem[i];
                 currentIndex++;
             }
@@ -121,15 +131,32 @@ contract Product is ERC1155, ERC1155Holder, Ownable {
         return items;
     }
 
-    function fetchProduct(uint256 tokenId)
+    function fetchProduct(uint256 _tokenId)
         external
         view
         returns (ProductItem memory)
     {
-        return idToProductItem[tokenId];
+        return idToProductItem[_tokenId];
     }
 
-    function buy(uint256 tokenId, uint256 amount) external payable {
+    function fetchProductBySlug(address _seller, string memory _slug)
+        external
+        view
+        returns (ProductItem memory)
+    {
+        uint256 totalItemCount = tokenIds.current();
+
+        for (uint256 i = 1; i <= totalItemCount; i++) {
+            ProductItem memory item = idToProductItem[i];
+            if (item.seller == _seller) {
+                return item;
+            }
+        }
+
+        revert("Error, product not found");
+    }
+
+    function buy(uint256 tokenId, uint256 quantity) external payable {
         ProductItem memory p = idToProductItem[tokenId];
         uint256 amountLeft = p.amount - p.sold;
 
@@ -137,12 +164,12 @@ contract Product is ERC1155, ERC1155Holder, Ownable {
             p.sold < idToProductItem[tokenId].amount,
             "Product is sold out"
         );
-        require(msg.value >= p.price, "Error, product costs more");
-        require(amount <= amountLeft, "Amount to big");
+        require(quantity <= amountLeft, "Error, quantity too large");
+        require(msg.value >= p.price * quantity, "Error, product costs more");
 
-        idToProductItem[tokenId].sold += 1;
+        idToProductItem[tokenId].sold += quantity;
 
-        _safeTransferFrom(address(this), msg.sender, tokenId, amount, "");
+        _safeTransferFrom(address(this), msg.sender, tokenId, quantity, "");
     }
 
     function uri(uint256 tokenId) public view override returns (string memory) {

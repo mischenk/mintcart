@@ -3,7 +3,12 @@ import { styled } from "@stitches/react";
 import { ethers } from "ethers";
 import { create as ipfsHttpClient } from "ipfs-http-client";
 
-import { useSigner, Web3Provider } from "../../context/Web3Context";
+import {
+  useSigner,
+  useAddress,
+  Web3Provider,
+  useDisplayAddress,
+} from "../../context/Web3Context";
 import Layout from "../../components/Layout";
 
 import { productAddress } from "../../../config";
@@ -14,6 +19,7 @@ const client = ipfsHttpClient("https://ipfs.infura.io:5001/api/v0");
 const CreateProductContent = () => {
   const router = useRouter();
   const signer = useSigner();
+  const displayAddress = useDisplayAddress();
 
   async function uploadToIPFS(title, description) {
     const data = JSON.stringify({
@@ -32,19 +38,20 @@ const CreateProductContent = () => {
   const onSubmit = async (ev) => {
     ev.preventDefault();
 
-    const { title, description, price, amount } = ev.target;
+    const { title, description, slug, price, amount } = ev.target;
     const metadataHash = await uploadToIPFS(title.value, description.value);
     const priceEther = ethers.utils.parseUnits(price.value, "ether");
 
     const contract = new ethers.Contract(productAddress, Product.abi, signer);
     const tx = await contract.createProduct(
       metadataHash,
+      slug.value,
       priceEther,
       amount.value
     );
     await tx.wait();
 
-    router.push("/products");
+    router.push("/dashboard");
   };
 
   return (
@@ -59,10 +66,16 @@ const CreateProductContent = () => {
         <Textarea
           id="description"
           name="description"
-          placeholder="Add a escription to your product"
+          placeholder="Add a description to your product"
         />
       </InputGroup>
-
+      <InputGroup>
+        <Label htmlFor="slug">URL</Label>
+        <SlugContainer>
+          <div>https://mintcart.xyz/{displayAddress}/</div>
+          <Input id="slug" name="slug" type="text" required />
+        </SlugContainer>
+      </InputGroup>
       <InputGroup>
         <Label htmlFor="price">Price</Label>
         <Input
@@ -116,6 +129,17 @@ const Textarea = styled("textarea", {
   width: "100%",
   minHeight: "10rem",
   fontSize: "1.1rem",
+});
+
+const SlugContainer = styled("div", {
+  display: "flex",
+  alignItems: "center",
+  backgroundColor: "#ccc",
+  color: "#555",
+  paddingLeft: "0.5rem",
+  input: {
+    marginLeft: "0.5rem",
+  },
 });
 
 const Button = styled("button", {
