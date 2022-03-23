@@ -5,8 +5,10 @@ import { styled } from "@stitches/react";
 
 import { getProvider } from "../../utils";
 import { Web3Provider, useSigner } from "../../context/Web3Context";
-import { productAddress } from "../../../config";
-import Product from "../../../artifacts/contracts/Product.sol/Product.json";
+
+import { productFactoryAddress } from "../../../config";
+import ProductFactoryArtifact from "../../../artifacts/contracts/ProductFactory.sol/ProductFactory.json";
+import ProductArtifact from "../../../artifacts/contracts/ProductV2.sol/Product.json";
 
 import SimpleLayout from "../../components/SimpleLayout";
 import Button from "../../components/ui/Button";
@@ -24,7 +26,11 @@ const CheckoutContent = ({ product }) => {
   const buyProduct = async (e) => {
     e.preventDefault();
 
-    const contract = new ethers.Contract(productAddress, Product.abi, signer);
+    const contract = new ethers.Contract(
+      productFactoryAddress,
+      ProductFactoryArtifact.abi,
+      signer
+    );
     const value = ethers.utils.parseUnits(
       (priceFloat * quantity).toString(),
       "ether"
@@ -41,7 +47,7 @@ const CheckoutContent = ({ product }) => {
       <>
         <ProductHeader>
           <div>
-            <ProductName>{product.title}</ProductName>
+            <ProductName>{product.name}</ProductName>
             <ProductSales>
               {product.sold} out of {product.amount} sold.
             </ProductSales>
@@ -187,12 +193,20 @@ const Checkout = (props) => {
 
 export const getStaticPaths = async () => {
   const provider = getProvider();
-  const contract = new ethers.Contract(productAddress, Product.abi, provider);
-  const data = await contract.fetchProducts();
+  const productFactory = new ethers.Contract(
+    productFactoryAddress,
+    ProductFactoryArtifact.abi,
+    provider
+  );
+  const productAddrs = await productFactory.fetchProducts();
 
-  const paths = data.map((d) => {
-    return { params: { address: d.seller, slug: d.slug } };
-  });
+  const paths = [];
+
+  for (let addr of productAddrs) {
+    const product = new ethers.Contract(addr, ProductArtifact.abi, provider);
+    const d = await product.get();
+    paths.push({ params: { address: d[1], slug: d[5] } });
+  }
 
   return {
     paths,
@@ -204,28 +218,39 @@ export const getStaticProps = async ({ params }) => {
   const { address = "", slug = "" } = params || {};
 
   const provider = getProvider();
-  const contract = new ethers.Contract(productAddress, Product.abi, provider);
-  const data = await contract.fetchProductBySlug(address, slug);
+  const productFactory = new ethers.Contract(
+    productFactoryAddress,
+    ProductFactoryArtifact.abi,
+    provider.getSigner()
+  );
+  const productAddress = await productFactory.fetchProductBySlug(
+    ethers.utils.getAddress(address),
+    slug
+  );
 
-  if (!data) {
-    return { props: { product: {} } };
+  if (!productAddress) {
+    return { props: { product: null } };
   }
 
-  const { tokenId, metadataHash, price, amount, sold } = data;
+  const product = new ethers.Contract(
+    productAddress,
+    ProductArtifact.abi,
+    provider.getSigner()
+  );
 
-  const meta = await axios.get(`https://ipfs.infura.io/ipfs/${metadataHash}`);
+  const [name, _slug, price, amount, sold, metadataHash] = await product.get();
+  return { props: { product: null } };
 
   if (!meta) {
-    return { props: { product: {} } };
+    return { props: { product: null } };
   }
 
-  const { title, description } = meta.data;
+  const { description } = meta.data;
 
   return {
     props: {
       product: {
-        id: tokenId.toString(),
-        title,
+        name,
         description,
         price: ethers.utils.formatUnits(price.toString(), "ether"),
         amount: amount.toString(),

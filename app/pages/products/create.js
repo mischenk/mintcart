@@ -11,24 +11,26 @@ import {
 } from "../../context/Web3Context";
 import Layout from "../../components/Layout";
 
-import { productAddress } from "../../../config";
-import Product from "../../../artifacts/contracts/Product.sol/Product.json";
+import { productFactoryAddress } from "../../../config";
+import ProductFactory from "../../../artifacts/contracts/ProductFactory.sol/ProductFactory.json";
 
-const client = ipfsHttpClient("https://ipfs.infura.io:5001/api/v0");
+const BASE_URI = "https://ipfs.infura.io/ipfs/";
+const ipfsClient = ipfsHttpClient("https://ipfs.infura.io:5001/api/v0");
 
 const CreateProductContent = () => {
   const router = useRouter();
   const signer = useSigner();
+  const address = useAddress();
   const displayAddress = useDisplayAddress();
 
-  async function uploadToIPFS(title, description) {
+  async function uploadToIPFS(name, description) {
     const data = JSON.stringify({
-      title,
+      name,
       description,
     });
 
     try {
-      const added = await client.add(data);
+      const added = await ipfsClient.add(data);
       return added.path;
     } catch (error) {
       console.log("Error uploading file: ", error);
@@ -38,14 +40,21 @@ const CreateProductContent = () => {
   const onSubmit = async (ev) => {
     ev.preventDefault();
 
-    const { title, description, slug, price, amount } = ev.target;
-    const metadataHash = await uploadToIPFS(title.value, description.value);
+    const { name, description, slug, price, amount } = ev.target;
+    const metadataHash = await uploadToIPFS(name.value, description.value);
     const priceEther = ethers.utils.parseUnits(price.value, "ether");
 
-    const contract = new ethers.Contract(productAddress, Product.abi, signer);
-    const tx = await contract.createProduct(
-      metadataHash,
+    const contract = new ethers.Contract(
+      productFactoryAddress,
+      ProductFactory.abi,
+      signer
+    );
+    const tx = await contract.create(
+      name.value,
+      BASE_URI,
+      tokenUri
       slug.value,
+      address,
       priceEther,
       amount.value
     );
@@ -57,8 +66,8 @@ const CreateProductContent = () => {
   return (
     <Form onSubmit={onSubmit}>
       <InputGroup>
-        <Label htmlFor="title">Title</Label>
-        <Input id="title" name="title" type="text" required />
+        <Label htmlFor="name">Name</Label>
+        <Input id="name" name="name" type="text" required />
       </InputGroup>
 
       <InputGroup>

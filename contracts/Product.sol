@@ -148,7 +148,11 @@ contract Product is ERC1155, ERC1155Holder, Ownable {
 
         for (uint256 i = 1; i <= totalItemCount; i++) {
             ProductItem memory item = idToProductItem[i];
-            if (item.seller == _seller) {
+            if (
+                item.seller == _seller &&
+                keccak256(abi.encodePacked(item.slug)) ==
+                keccak256(abi.encodePacked(_slug))
+            ) {
                 return item;
             }
         }

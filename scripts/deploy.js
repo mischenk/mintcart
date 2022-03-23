@@ -2,20 +2,16 @@ const hre = require("hardhat");
 const fs = require("fs");
 
 async function main() {
-  const Product = await hre.ethers.getContractFactory("Product");
-  const product = await Product.deploy(
-    "NFT Products",
-    "https://ipfs.infura.io/ipfs/"
-  );
+  const ProductFactory = await hre.ethers.getContractFactory("ProductFactory");
+  const productFactory = await ProductFactory.deploy();
+  await productFactory.deployed();
 
-  await product.deployed();
-
-  console.log("Product deployed to:", product.address);
+  console.log("Product deployed to:", productFactory.address);
 
   fs.writeFileSync(
     "./config.js",
     `
-  export const productAddress = "${product.address}"
+  export const productFactoryAddress = "${productFactory.address}"
   `
   );
 }

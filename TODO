@@ -1,14 +1,13 @@
-change checkout page route: /seller-address/product-name
-add product status: mint after creation
+title -> name
+set up firebase to store products
 edit product
 delete product
-title -> name
+add image
+add product status: mint after creation
 add switch account event listener
 add wallet modal
-add image
-
 use signature request for log in
-add icons
+add UI icons
 
 deploy in mumbai
 deploy on vercel

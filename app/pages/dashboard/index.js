@@ -9,8 +9,9 @@ import Button from "../../components/ui/Button";
 import ConnectWallet from "../../components/ConnectWallet";
 import { useSigner, useAddress, Web3Provider } from "../../context/Web3Context";
 
-import { productAddress } from "../../../config";
-import Product from "../../../artifacts/contracts/Product.sol/Product.json";
+import { productFactoryAddress } from "../../../config";
+import ProductFactoryArtifact from "../../../artifacts/contracts/ProductFactory.sol/ProductFactory.json";
+import ProductArtifact from "../../../artifacts/contracts/ProductV2.sol/Product.json";
 
 const DashboardContent = () => {
   const [products, setProducts] = useState([]);
@@ -23,28 +24,29 @@ const DashboardContent = () => {
       return;
     }
 
-    const contract = new ethers.Contract(productAddress, Product.abi, signer);
+    const productFactory = new ethers.Contract(
+      productFactoryAddress,
+      ProductFactoryArtifact.abi,
+      signer
+    );
 
-    const data = await contract.fetchSellerProducts(address);
+    const productAddrs = await productFactory.fetchSellerProducts(address);
     const products = await Promise.all(
-      data.map(async (i) => {
-        console.log(i);
-        const meta = await axios.get(
-          `https://ipfs.infura.io/ipfs/${i.metadataHash}`
+      productAddrs.map(async (address) => {
+        const product = new ethers.Contract(
+          address,
+          ProductArtifact.abi,
+          signer
         );
-        const title = meta ? meta.data.title : null;
-        const tokenId = i.tokenId;
-        const price = ethers.utils.formatUnits(i.price, "ether");
-        const slug = i.slug;
-        const amount = i.amount.toNumber();
-        const sold = i.sold.toNumber();
+
+        const [name, slug, price, amount, sold] = await product.get();
         return {
-          tokenId,
-          title,
+          address,
+          name,
           slug,
-          price,
-          amount,
-          sold,
+          price: ethers.utils.formatUnits(price, "ether"),
+          amount: amount.toNumber(),
+          sold: sold.toNumber(),
         };
       })
     );
@@ -76,18 +78,18 @@ const DashboardContent = () => {
           </thead>
           <tbody>
             {products.map((p) => (
-              <tr key={p.tokenId}>
+              <tr key={p.address}>
                 <td>
-                  <Link href={`/products/${p.slug}`} key={p.tokenId}>
-                    <a>{p.title}</a>
+                  <Link href={`/products/${p.slug}`}>
+                    <a>{p.name}</a>
                   </Link>
                 </td>
                 <td>{parseFloat(p.price)} eth</td>
                 <td>
-                  {p.sold == p.amount ? "Sold out!" : `{p.sold}/{p.amount}`}
+                  {p.sold == p.amount ? "Sold out!" : `${p.sold}/${p.amount}`}
                 </td>
                 <td>
-                  <Link href={`/${address}/${p.slug}`} key={p.tokenId}>
+                  <Link href={`/${address}/${p.slug}`}>
                     <a target="_blank">View checkout page</a>
                   </Link>
                 </td>
