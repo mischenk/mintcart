@@ -1,21 +1,40 @@
-import { useState } from "react";
-import { ethers } from "ethers";
-import axios from "axios";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
+
 import { styled } from "@stitches/react";
 
-import { getProvider } from "../../utils";
-import { Web3Provider, useSigner } from "../../context/Web3Context";
+import { getProductBySlug, buyProduct } from "../../utils";
+import {
+  Web3Provider,
+  useSigner,
+  useChainId,
+  useAddress,
+} from "../../context/Web3Context";
 
-import { productFactoryAddress } from "../../../config";
-import ProductFactoryArtifact from "../../../artifacts/contracts/ProductFactory.sol/ProductFactory.json";
 import ProductArtifact from "../../../artifacts/contracts/ProductV2.sol/Product.json";
 
 import SimpleLayout from "../../components/SimpleLayout";
 import Button from "../../components/ui/Button";
 
-const CheckoutContent = ({ product }) => {
+const CheckoutContent = () => {
   const [quantity, setQuantity] = useState(1);
+  const [product, setProduct] = useState();
+  const [loading, setLoading] = useState(true);
+  const chainId = useChainId();
   const signer = useSigner();
+  const walletAddress = useAddress();
+  const router = useRouter();
+
+  const { address, slug } = router.query;
+
+  const init = async () => {
+    const product = await getProductBySlug(chainId, signer, address, slug);
+
+    setProduct(product);
+    setLoading(false);
+  };
+
+  useEffect(() => init(), [chainId, signer]);
 
   if (!product) {
     return <div>Error: product not found</div>;
@@ -24,19 +43,7 @@ const CheckoutContent = ({ product }) => {
   const buyProduct = async (e) => {
     e.preventDefault();
 
-    const contract = new ethers.Contract(
-      product.productAddress,
-      ProductArtifact.abi,
-      signer
-    );
-    const value = ethers.utils.parseUnits(
-      (product.price * quantity).toString(),
-      "ether"
-    );
-    const tx = await contract.buy(quantity, {
-      value,
-    });
-    await tx.wait();
+    await buyProduct();
     location.reload();
   };
 
@@ -186,93 +193,6 @@ const Checkout = (props) => {
       </SimpleLayout>
     </Web3Provider>
   );
-};
-
-export const getStaticPaths = async () => {
-  const provider = getProvider();
-  const productFactory = new ethers.Contract(
-    productFactoryAddress,
-    ProductFactoryArtifact.abi,
-    provider
-  );
-  const productAddrs = await productFactory.fetchProducts();
-
-  const paths = [];
-
-  for (let addr of productAddrs) {
-    const product = new ethers.Contract(addr, ProductArtifact.abi, provider);
-
-    const address = await product.owner();
-    const tokenUri = await product.tokenUri();
-    const meta = await axios.get(tokenUri);
-    const { slug } = meta.data;
-
-    paths.push({ params: { address, slug } });
-  }
-
-  return {
-    paths,
-    fallback: true,
-  };
-};
-
-export const getStaticProps = async ({ params }) => {
-  const { address = "", slug = "" } = params || {};
-
-  const provider = getProvider();
-  const productFactory = new ethers.Contract(
-    productFactoryAddress,
-    ProductFactoryArtifact.abi,
-    provider.getSigner()
-  );
-  const productAddress = await productFactory.fetchProductBySlug(
-    ethers.utils.getAddress(address),
-    slug
-  );
-
-  if (!productAddress) {
-    return { props: { product: null } };
-  }
-
-  const product = new ethers.Contract(
-    productAddress,
-    ProductArtifact.abi,
-    provider.getSigner()
-  );
-
-  const tokenUri = await product.tokenUri();
-  const meta = await axios.get(tokenUri);
-
-  if (!meta) {
-    return { props: { product: null } };
-  }
-
-  const { name, description } = meta.data;
-
-  const price = await product.price();
-  const supply = await product.supply();
-  const sold = await product.sold();
-
-  console.log({
-    name,
-    description,
-    price: parseFloat(ethers.utils.formatUnits(price.toString(), "ether")),
-    supply: parseInt(supply.toString()),
-    sold: parseInt(sold.toString()),
-  });
-
-  return {
-    props: {
-      product: {
-        name,
-        productAddress,
-        description,
-        price: parseFloat(ethers.utils.formatUnits(price.toString(), "ether")),
-        supply: parseInt(supply.toString()),
-        sold: parseInt(sold.toString()),
-      },
-    },
-  };
 };
 
 export default Checkout;

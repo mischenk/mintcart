@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "staging": "env-cmd -f .env.test yarn build && yarn start",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

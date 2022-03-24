@@ -1,64 +1,34 @@
 import Link from "next/link";
-import { ethers } from "ethers";
+
 import { useState, useEffect } from "react";
 import { styled } from "@stitches/react";
-import axios from "axios";
 
 import Layout from "../../components/Layout";
 import Button from "../../components/ui/Button";
 import ConnectWallet from "../../components/ConnectWallet";
-import { useSigner, useAddress, Web3Provider } from "../../context/Web3Context";
-
-import { productFactoryAddress } from "../../../config";
-import ProductFactoryArtifact from "../../../artifacts/contracts/ProductFactory.sol/ProductFactory.json";
-import ProductArtifact from "../../../artifacts/contracts/ProductV2.sol/Product.json";
+import {
+  useChainId,
+  useSigner,
+  useAddress,
+  Web3Provider,
+} from "../../context/Web3Context";
+import { getSellerProducts } from "../../utils";
 
 const DashboardContent = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const chainId = useChainId();
   const signer = useSigner();
   const address = useAddress();
 
   const init = async () => {
-    if (!signer || !address) {
-      return;
-    }
-
-    const productFactory = new ethers.Contract(
-      productFactoryAddress,
-      ProductFactoryArtifact.abi,
-      signer
-    );
-
-    const productAddrs = await productFactory.fetchSellerProducts(address);
-    const products = await Promise.all(
-      productAddrs.map(async (address) => {
-        const product = new ethers.Contract(
-          address,
-          ProductArtifact.abi,
-          signer
-        );
-
-        const tokenUri = await product.tokenUri();
-        const meta = await axios.get(tokenUri);
-        const { name, slug } = meta.data;
-
-        return {
-          address,
-          name,
-          slug,
-          price: ethers.utils.formatUnits(await product.price(), "ether"),
-          supply: (await product.supply()).toNumber(),
-          sold: (await product.sold()).toNumber(),
-        };
-      })
-    );
-
+    const products = await getSellerProducts(chainId, signer, address);
     setProducts(products);
     setLoading(false);
   };
 
-  useEffect(() => init(), [signer, address]);
+  useEffect(() => init(), [chainId, signer, address]);
 
   if (!address) {
     return <ConnectWallet />;
@@ -69,7 +39,7 @@ const DashboardContent = () => {
   ) : (
     <div>
       <PageTitle>Products</PageTitle>
-      {products.length ? (
+      {products && products.length ? (
         <ProductTable>
           <thead>
             <tr>
