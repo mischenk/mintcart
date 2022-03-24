@@ -1,13 +1,13 @@
-title -> name
-set up firebase to store products
+deploy on vercel
+add spinner
+
+set up firebase to store products + sales
+
 edit product
 delete product
 add image
-add product status: mint after creation
-add switch account event listener
+add recipient
+fix switch account event listener
 add wallet modal
 use signature request for log in
 add UI icons
-
-deploy in mumbai
-deploy on vercel
