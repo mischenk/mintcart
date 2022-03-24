@@ -52,7 +52,7 @@ contract Product is ERC1155, ERC1155Holder, Ownable {
         require(msg.value >= price * amount, "Error, product costs more");
         require(
             amount <= supply - sold,
-            "Error, amount is higher than supply left"
+            "Error, amount is higher than available supply"
         );
 
         tokenIds.increment();
