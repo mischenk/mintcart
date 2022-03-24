@@ -39,14 +39,17 @@ const DashboardContent = () => {
           signer
         );
 
-        const [name, slug, price, amount, sold] = await product.get();
+        const tokenUri = await product.tokenUri();
+        const meta = await axios.get(tokenUri);
+        const { name, slug } = meta.data;
+
         return {
           address,
           name,
           slug,
-          price: ethers.utils.formatUnits(price, "ether"),
-          amount: amount.toNumber(),
-          sold: sold.toNumber(),
+          price: ethers.utils.formatUnits(await product.price(), "ether"),
+          supply: (await product.supply()).toNumber(),
+          sold: (await product.sold()).toNumber(),
         };
       })
     );
@@ -86,7 +89,7 @@ const DashboardContent = () => {
                 </td>
                 <td>{parseFloat(p.price)} eth</td>
                 <td>
-                  {p.sold == p.amount ? "Sold out!" : `${p.sold}/${p.amount}`}
+                  {p.sold} out of {p.supply}
                 </td>
                 <td>
                   <Link href={`/${address}/${p.slug}`}>

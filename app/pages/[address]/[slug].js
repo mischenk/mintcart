@@ -21,21 +21,19 @@ const CheckoutContent = ({ product }) => {
     return <div>Error: product not found</div>;
   }
 
-  const priceFloat = parseFloat(product.price.toString());
-
   const buyProduct = async (e) => {
     e.preventDefault();
 
     const contract = new ethers.Contract(
-      productFactoryAddress,
-      ProductFactoryArtifact.abi,
+      product.productAddress,
+      ProductArtifact.abi,
       signer
     );
     const value = ethers.utils.parseUnits(
-      (priceFloat * quantity).toString(),
+      (product.price * quantity).toString(),
       "ether"
     );
-    const tx = await contract.buy(product.id, quantity, {
+    const tx = await contract.buy(quantity, {
       value,
     });
     await tx.wait();
@@ -49,11 +47,11 @@ const CheckoutContent = ({ product }) => {
           <div>
             <ProductName>{product.name}</ProductName>
             <ProductSales>
-              {product.sold} out of {product.amount} sold.
+              {product.sold} out of {product.supply} sold.
             </ProductSales>
           </div>
           <ProductPrice>
-            {priceFloat} <span>ETH</span>
+            {product.price} <span>ETH</span>
           </ProductPrice>
         </ProductHeader>
 
@@ -70,17 +68,16 @@ const CheckoutContent = ({ product }) => {
       <OrderSummary>
         <TotalLabel>Total</TotalLabel>
         <TotalPrice>
-          {quantity ? priceFloat * quantity : 0} <span>ETH</span>
+          {quantity ? product.price * quantity : 0} <span>ETH</span>
         </TotalPrice>
       </OrderSummary>
 
-      {parseInt(product.sold.toString()) <
-      parseInt(product.amount.toString()) ? (
+      {product.sold < product.supply ? (
         <PurchaseContainer>
           <QuantityInput
             type="number"
             min={1}
-            max={product.amount - product.sold}
+            max={product.supply - product.sold}
             value={quantity}
             onChange={(e) => setQuantity(parseInt(e.target.value))}
           />
@@ -173,7 +170,7 @@ const PurchaseContainer = styled("div", {
 const QuantityInput = styled("input", {
   width: "100px",
   marginRight: "1rem",
-  padding: "0.5rem 1rem",
+  padding: "0.5rem 0.3rem 0.5rem 1rem",
   textAlign: "center",
   borderStyle: "solid",
   borderWidth: "1px",
@@ -204,8 +201,13 @@ export const getStaticPaths = async () => {
 
   for (let addr of productAddrs) {
     const product = new ethers.Contract(addr, ProductArtifact.abi, provider);
-    const d = await product.get();
-    paths.push({ params: { address: d[1], slug: d[5] } });
+
+    const address = await product.owner();
+    const tokenUri = await product.tokenUri();
+    const meta = await axios.get(tokenUri);
+    const { slug } = meta.data;
+
+    paths.push({ params: { address, slug } });
   }
 
   return {
@@ -238,23 +240,36 @@ export const getStaticProps = async ({ params }) => {
     provider.getSigner()
   );
 
-  const [name, _slug, price, amount, sold, metadataHash] = await product.get();
-  return { props: { product: null } };
+  const tokenUri = await product.tokenUri();
+  const meta = await axios.get(tokenUri);
 
   if (!meta) {
     return { props: { product: null } };
   }
 
-  const { description } = meta.data;
+  const { name, description } = meta.data;
+
+  const price = await product.price();
+  const supply = await product.supply();
+  const sold = await product.sold();
+
+  console.log({
+    name,
+    description,
+    price: parseFloat(ethers.utils.formatUnits(price.toString(), "ether")),
+    supply: parseInt(supply.toString()),
+    sold: parseInt(sold.toString()),
+  });
 
   return {
     props: {
       product: {
         name,
+        productAddress,
         description,
-        price: ethers.utils.formatUnits(price.toString(), "ether"),
-        amount: amount.toString(),
-        sold: sold.toString(),
+        price: parseFloat(ethers.utils.formatUnits(price.toString(), "ether")),
+        supply: parseInt(supply.toString()),
+        sold: parseInt(sold.toString()),
       },
     },
   };

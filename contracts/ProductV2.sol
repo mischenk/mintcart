@@ -4,92 +4,65 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Product is ERC1155, ERC1155Holder {
+contract Product is ERC1155, ERC1155Holder, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private tokenIds;
 
     //===== Mutable state ======
-    string public name;
-    string public baseUri;
     string public tokenUri;
     address payable seller;
-    string public slug;
     uint256 public price;
-    uint256 public amount;
+    uint256 public supply;
     uint256 public sold;
 
-    mapping(uint256 => string) public metadataHashesById;
-
     constructor(
-        string memory _name,
-        string memory _baseUri,
         string memory _tokenUri,
         address _seller,
-        string memory _slug,
         uint256 _price,
-        uint256 _amount
-    ) ERC1155(_baseUri) {
-        name = _name;
-        baseUri = _baseUri;
+        uint256 _supply
+    ) ERC1155(tokenUri) {
         tokenUri = _tokenUri;
         seller = payable(_seller);
-        slug = _slug;
         price = _price;
-        amount = _amount;
+        supply = _supply;
         sold = 0;
+
+        transferOwnership(seller);
     }
 
-    function get()
-        public
-        view
-        returns (
-            string memory,
-            string memory,
-            uint256,
-            uint256,
-            uint256,
-            address,
-            string memory
-        )
-    {
-        return (name, slug, price, amount, sold, seller, tokenUri);
+    function setTokenUri(string memory _tokenUri) external onlyOwner {
+        tokenUri = _tokenUri;
     }
 
-    function mint(uint256 _quantity, string memory metadataHash)
-        public
-        returns (uint256)
-    {
+    function setPrice(uint256 _price) external onlyOwner {
+        price = _price;
+    }
+
+    function setSupply(uint256 _supply) external onlyOwner {
+        supply = _supply;
+    }
+
+    function buy(uint256 amount) external payable returns (uint256) {
+        require(
+            msg.sender == tx.origin,
+            "No transactions from smart contracts!"
+        );
+        require(msg.value >= price * amount, "Error, product costs more");
+        require(
+            amount <= supply - sold,
+            "Error, amount is higher than supply left"
+        );
+
         tokenIds.increment();
         uint256 newTokenId = tokenIds.current();
 
-        metadataHashesById[newTokenId] = metadataHash;
+        sold += amount;
 
-        _mint(msg.sender, newTokenId, _quantity, "");
-
-        _safeTransferFrom(msg.sender, address(this), newTokenId, _quantity, "");
+        _mint(msg.sender, newTokenId, amount, "");
 
         return newTokenId;
-    }
-
-    function buy(uint256 tokenId, uint256 quantity) external payable {
-        require(msg.value >= price * quantity, "Error, product costs more");
-
-        sold += quantity;
-
-        _safeTransferFrom(address(this), msg.sender, tokenId, quantity, "");
-    }
-
-    function uri(uint256 _tokenId)
-        public
-        view
-        override
-        returns (string memory)
-    {
-        return
-            string(
-                abi.encodePacked(baseUri, metadataHashesById[_tokenId], ".json")
-            );
     }
 
     function supportsInterface(bytes4 interfaceId)

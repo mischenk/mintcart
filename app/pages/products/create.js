@@ -23,9 +23,10 @@ const CreateProductContent = () => {
   const address = useAddress();
   const displayAddress = useDisplayAddress();
 
-  async function uploadToIPFS(name, description) {
+  async function uploadToIPFS(name, slug, description) {
     const data = JSON.stringify({
       name,
+      slug,
       description,
     });
 
@@ -41,7 +42,12 @@ const CreateProductContent = () => {
     ev.preventDefault();
 
     const { name, description, slug, price, amount } = ev.target;
-    const metadataHash = await uploadToIPFS(name.value, description.value);
+    const ipfsHash = await uploadToIPFS(
+      name.value,
+      slug.value,
+      description.value
+    );
+    const tokenUri = `${BASE_URI}${ipfsHash}`;
     const priceEther = ethers.utils.parseUnits(price.value, "ether");
 
     const contract = new ethers.Contract(
@@ -50,9 +56,7 @@ const CreateProductContent = () => {
       signer
     );
     const tx = await contract.create(
-      name.value,
-      BASE_URI,
-      tokenUri
+      tokenUri,
       slug.value,
       address,
       priceEther,

@@ -11,25 +11,18 @@ contract ProductFactory {
     constructor() {}
 
     function create(
-        string memory name,
-        string memory baseUri,
+        string memory tokenUri,
         string memory slug,
         address payable seller,
         uint256 price,
-        uint256 amount
+        uint256 supply
     ) external returns (address) {
-        require(amount > 0, "Required to mint at least 1 product");
+        require(supply > 0, "Error, supply must be at least 1");
 
-        Product product = new Product(
-            name,
-            baseUri,
-            seller,
-            slug,
-            price,
-            amount
-        );
+        Product product = new Product(tokenUri, seller, price, supply);
 
         address addr = address(product);
+
         allProducts.push(addr);
         productsBySeller[seller].push(addr);
         productsBySlug[seller][slug] = addr;
