@@ -42,12 +42,14 @@ export const Web3Provider = ({ children }) => {
   const switchAccount = useCallback(
     (provider, accounts) => {
       const addr = accounts[0];
+      setDisplayAddress(`${addr.slice(0, 6)}...${addr.slice(-4)}`);
+
       setAddress(addr);
       provider
         .lookupAddress(addr)
         .then((d) => setDisplayAddress(d))
         .catch((error) => {
-          setDisplayAddress(`${addr.slice(0, 6)}...${addr.slice(-4)}`);
+          console.log(error);
         });
     },
     [setAddress, setDisplayAddress]
