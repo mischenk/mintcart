@@ -11,8 +11,6 @@ import {
   useAddress,
 } from "../../context/Web3Context";
 
-import ProductArtifact from "../../../artifacts/contracts/ProductV2.sol/Product.json";
-
 import SimpleLayout from "../../components/SimpleLayout";
 import Button from "../../components/ui/Button";
 
@@ -40,7 +38,7 @@ const CheckoutContent = () => {
     return <div>Error: product not found</div>;
   }
 
-  const buyProduct = async (e) => {
+  const placeOrder = async (e) => {
     e.preventDefault();
 
     await buyProduct();
@@ -88,7 +86,7 @@ const CheckoutContent = () => {
             value={quantity}
             onChange={(e) => setQuantity(parseInt(e.target.value))}
           />
-          <Button style="wide" onClick={buyProduct}>
+          <Button style="wide" onClick={placeOrder}>
             Place your order
           </Button>
         </PurchaseContainer>
