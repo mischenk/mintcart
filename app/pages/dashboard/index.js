@@ -53,9 +53,9 @@ const DashboardContent = () => {
             {products.map((p) => (
               <tr key={p.address}>
                 <td>
-                  <Link href={`/products/${p.slug}`}>
-                    <a>{p.name}</a>
-                  </Link>
+                  <a>
+                    {p.name} {chainId}
+                  </a>
                 </td>
                 <td>{parseFloat(p.price)} eth</td>
                 <td>
