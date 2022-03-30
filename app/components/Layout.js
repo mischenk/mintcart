@@ -39,7 +39,9 @@ const Layout = ({ pageTitle, children }) => {
 
       <PageHeader>
         <PageHeaderTitle>
-          <a href="/">mintcart</a>
+          <Link href="/">
+            <a>mintcart</a>
+          </Link>
         </PageHeaderTitle>
         <WalletContainer>
           {address ? (

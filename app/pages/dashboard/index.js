@@ -25,16 +25,14 @@ const DashboardContent = () => {
   const chainId = useChainId();
   const address = useAddress();
 
-  const init = async () => {
+  useEffect(() => {
     if (!chainId || !address) return;
 
     axios.get(`/api/products/${chainId}/${address}`).then((result) => {
       setProducts(result.data.products);
       setLoading(false);
     });
-  };
-
-  useEffect(() => init(), [chainId, address]);
+  }, [chainId, address]);
 
   if (!address) {
     return <ConnectWallet />;

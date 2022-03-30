@@ -24,16 +24,14 @@ const CheckoutContent = () => {
 
   const { address, slug } = router.query;
 
-  const init = async () => {
+  useEffect(() => {
     if (!address || !slug) return;
 
     axios.get(`/api/store/${address}/${slug}`).then((result) => {
       setProduct(result.data.product);
       setLoading(false);
     });
-  };
-
-  useEffect(() => init(), [address, slug]);
+  }, [address, slug]);
 
   const buyProduct = async () => {
     const contract = await getProductFactoryContract(chainId, signer);
