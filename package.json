@@ -17,10 +17,8 @@
   "license": "ISC",
   "dependencies": {
     "@openzeppelin/contracts": "^4.5.0",
-    "axios": "^0.26.1",
     "create-next-app": "^12.1.0",
     "dotenv": "^16.0.0",
-    "firebase": "^9.6.9",
     "npx hardhat": "^2.9.1"
   },
   "devDependencies": {
