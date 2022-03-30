@@ -1,4 +1,4 @@
-import { MUMBAI_ADDRESS } from "../artifacts/addresses";
+import { MUMBAI_ADDRESS } from "./addresses";
 
 const MUMBAI_NETWORK_ID = 0x13881;
 const LOCALHOST_NETWORK_ID = 0x539;

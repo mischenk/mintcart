@@ -27,7 +27,7 @@ async function main() {
     updateEnvVar("NEXT_PUBLIC_LOCAL_ADDRESS", contract.address);
   } else {
     fs.appendFileSync(
-      "artifacts/addresses.js",
+      "app/addresses.js",
       `module.exports.${network.name.toUpperCase()}_ADDRESS = "${
         contract.address
       }";\n`
