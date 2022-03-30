@@ -1,8 +1,8 @@
 import { useRouter } from "next/router";
 import { styled } from "@stitches/react";
+import axios from "axios";
 
-import { createProduct } from "../../utils";
-
+import { ipfsAdd, getTokenUri, getProductFactoryContract } from "../../utils";
 import {
   useSigner,
   useAddress,
@@ -23,16 +23,35 @@ const CreateProductContent = () => {
     ev.preventDefault();
 
     const { name, description, slug, price, supply } = ev.target;
-    await createProduct(
-      chainId,
-      signer,
+
+    // Save metadata to IPFS
+    const ipfsHash = await ipfsAdd(name.value, slug.value, description.value);
+
+    const tokenUri = getTokenUri(ipfsHash);
+
+    // Deploy product contract
+    const contract = await getProductFactoryContract(chainId, signer);
+    await contract.create(
+      tokenUri,
+      slug.value,
       address,
       price.value,
-      name.value,
-      slug.value,
-      description.value,
       supply.value
     );
+
+    // Save product data to db
+    await axios.post("/api/products", {
+      contract: contract.address,
+      chainId,
+      seller: address,
+      name: name.value,
+      description: description.value,
+      slug: slug.value,
+      tokenUri,
+      price: price.value,
+      supply: supply.value,
+      sold: 0,
+    });
 
     router.push("/dashboard");
   };

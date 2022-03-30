@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-
 import { styled } from "@stitches/react";
+import axios from "axios";
 
-import { getProductBySlug, buyProduct } from "../../utils";
+import { getProductFactoryContract, getProductContract } from "../../utils";
 import {
   Web3Provider,
   useSigner,
@@ -20,22 +20,41 @@ const CheckoutContent = () => {
   const [loading, setLoading] = useState(true);
   const chainId = useChainId();
   const signer = useSigner();
-  const walletAddress = useAddress();
   const router = useRouter();
 
   const { address, slug } = router.query;
 
   const init = async () => {
-    const product = await getProductBySlug(chainId, signer, address, slug);
+    if (!address || !slug) return;
 
-    setProduct(product);
-    setLoading(false);
+    axios.get(`/api/store/${address}/${slug}`).then((result) => {
+      setProduct(result.data.product);
+      setLoading(false);
+    });
   };
 
-  useEffect(() => init(), [chainId, signer]);
+  useEffect(() => init(), [address, slug]);
 
-  if (!product) {
+  const buyProduct = async () => {
+    const contract = await getProductFactoryContract(chainId, signer);
+    const value = ethers.utils.parseUnits(
+      (product.price * quantity).toString(),
+      "ether"
+    );
+    const tx = await contract.buy(quantity, {
+      value,
+    });
+    await tx.wait();
+
+    await axios.post(`/api/buy/${address}/${slug}`);
+  };
+
+  if (!product && !loading) {
     return <div>Error: product not found</div>;
+  }
+
+  if (loading) {
+    return <div>Loading...</div>;
   }
 
   const placeOrder = async (e) => {

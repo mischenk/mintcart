@@ -44,6 +44,20 @@ contract Product is ERC1155, ERC1155Holder, Ownable {
         supply = _supply;
     }
 
+    function get()
+        external
+        view
+        returns (
+            string memory,
+            address,
+            uint256,
+            uint256,
+            uint256
+        )
+    {
+        return (tokenUri, seller, price, supply, sold);
+    }
+
     function buy(uint256 amount) external payable returns (uint256) {
         require(
             msg.sender == tx.origin,

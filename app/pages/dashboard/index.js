@@ -1,7 +1,7 @@
 import Link from "next/link";
-
 import { useState, useEffect } from "react";
 import { styled } from "@stitches/react";
+import axios from "axios";
 
 import Layout from "../../components/Layout";
 import Button from "../../components/ui/Button";
@@ -12,23 +12,29 @@ import {
   useAddress,
   Web3Provider,
 } from "../../context/Web3Context";
-import { getSellerProducts } from "../../utils";
+import {
+  getProductFactoryContract,
+  getProductContract,
+  parseEthers,
+} from "../../utils";
 
 const DashboardContent = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const chainId = useChainId();
-  const signer = useSigner();
   const address = useAddress();
 
   const init = async () => {
-    const products = await getSellerProducts(chainId, signer, address);
-    setProducts(products);
-    setLoading(false);
+    if (!chainId || !address) return;
+
+    axios.get(`/api/products/${chainId}/${address}`).then((result) => {
+      setProducts(result.data.products);
+      setLoading(false);
+    });
   };
 
-  useEffect(() => init(), [chainId, signer, address]);
+  useEffect(() => init(), [chainId, address]);
 
   if (!address) {
     return <ConnectWallet />;
@@ -51,18 +57,16 @@ const DashboardContent = () => {
           </thead>
           <tbody>
             {products.map((p) => (
-              <tr key={p.address}>
+              <tr key={p.contract}>
                 <td>
-                  <a>
-                    {p.name} {chainId}
-                  </a>
+                  <a>{p.name}</a>
                 </td>
-                <td>{parseFloat(p.price)} eth</td>
+                <td>{p.price} eth</td>
                 <td>
                   {p.sold} out of {p.supply}
                 </td>
                 <td>
-                  <Link href={`/${address}/${p.slug}`}>
+                  <Link href={`/${p.seller}/${p.slug}`}>
                     <a target="_blank">View checkout page</a>
                   </Link>
                 </td>

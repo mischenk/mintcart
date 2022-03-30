@@ -1,8 +1,9 @@
-deploy on vercel
-add spinner
-
 set up firebase to store products + sales
 
+deploy on vercel
+
+add spinner
+check slug uniqueness
 edit product
 delete product
 add image

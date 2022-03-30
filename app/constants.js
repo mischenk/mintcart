@@ -7,3 +7,5 @@ export const contractAddressesByNetworkId = {
   [LOCALHOST_NETWORK_ID]: process.env.NEXT_PUBLIC_LOCAL_ADDRESS || "",
   [MUMBAI_NETWORK_ID]: MUMBAI_ADDRESS,
 };
+
+export const ipfsBaseUri = "https://ipfs.infura.io/ipfs/";
