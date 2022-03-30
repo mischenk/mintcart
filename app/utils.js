@@ -3,8 +3,8 @@ import { create as ipfsHttpClient } from "ipfs-http-client";
 import axios from "axios";
 
 import { contractAddressesByNetworkId, ipfsBaseUri } from "./constants";
-import ProductFactoryArtifact from "../artifacts/contracts/ProductFactory.sol/ProductFactory.json";
-import ProductArtifact from "../artifacts/contracts/ProductV2.sol/Product.json";
+import ProductFactoryArtifact from "./artifacts/contracts/ProductFactory.sol/ProductFactory.json";
+import ProductArtifact from "./artifacts/contracts/ProductV2.sol/Product.json";
 
 const ipfsClient = ipfsHttpClient("https://ipfs.infura.io:5001/api/v0");
 

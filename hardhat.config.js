@@ -27,4 +27,7 @@ module.exports = {
       },
     },
   },
+  paths: {
+    artifacts: "./app/artifacts",
+  },
 };
