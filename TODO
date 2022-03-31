@@ -1,5 +1,7 @@
 set up firebase to store sales
 
+show order confirmation
+email order confirmation
 check slug uniqueness
 edit product
 delete product
@@ -11,3 +13,4 @@ fix switch account event listener
 add wallet modal
 use signature request for log in
 add UI icons
+use tailwind

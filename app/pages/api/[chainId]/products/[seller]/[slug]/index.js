@@ -20,7 +20,10 @@ export default function handler(req, res) {
           return res.status(404).json({ message: "Product not found" });
         }
 
-        const product = data.docs[0].data();
+        const product = {
+          id: data.docs[0].id,
+          ...data.docs[0].data(),
+        };
         res.status(200).json({
           product,
         });

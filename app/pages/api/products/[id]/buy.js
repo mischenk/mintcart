@@ -3,7 +3,7 @@ import { increment, doc, getDoc, updateDoc } from "firebase/firestore";
 import { database } from "../../../../firebaseConfig";
 
 export default function handler(req, res) {
-  if (req.method == "PUT") {
+  if (req.method == "POST") {
     const { id } = req.query;
     const { amount } = req.body;
 

@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { useRouter } from "next/router";
 import { styled } from "@stitches/react";
 import axios from "axios";
+import { TailSpin } from "react-loader-spinner";
 
 import { ipfsAdd, getTokenUri, getProductFactoryContract } from "../../utils";
 import {
@@ -13,6 +15,8 @@ import {
 import Layout from "../../components/Layout";
 
 const CreateProductContent = () => {
+  const [loading, setLoading] = useState(false);
+
   const router = useRouter();
   const chainId = useChainId();
   const signer = useSigner();
@@ -21,6 +25,8 @@ const CreateProductContent = () => {
 
   const onSubmit = async (ev) => {
     ev.preventDefault();
+
+    setLoading(true);
 
     const { name, description, slug, price, supply } = ev.target;
 
@@ -56,7 +62,16 @@ const CreateProductContent = () => {
     router.push("/dashboard");
   };
 
-  return (
+  return loading ? (
+    <Loading>
+      <TailSpin
+        ariaLabel="loading-indicator"
+        color="#111"
+        width={40}
+        height={40}
+      />
+    </Loading>
+  ) : (
     <Form onSubmit={onSubmit}>
       <InputGroup>
         <Label htmlFor="name">Name</Label>
@@ -104,6 +119,14 @@ const CreateProductContent = () => {
     </Form>
   );
 };
+
+const Loading = styled("div", {
+  width: "100%",
+  height: "100%",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+});
 
 const Form = styled("form", {
   maxWidth: "800px",

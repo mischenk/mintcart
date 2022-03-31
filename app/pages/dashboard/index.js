@@ -38,7 +38,7 @@ const DashboardContent = () => {
       <TailSpin
         ariaLabel="loading-indicator"
         color="#111"
-        height={40}
+        width={40}
         height={40}
       />
     </Loading>

@@ -36,6 +36,8 @@ const CheckoutContent = () => {
   }, [chainId, address, slug]);
 
   const buyProduct = async () => {
+    setLoading(true);
+
     const contract = await getProductContract(address, signer);
     const value = ethers.utils.parseUnits(
       (product.price * quantity).toString(),
@@ -46,7 +48,9 @@ const CheckoutContent = () => {
     });
     await tx.wait();
 
-    await axios.post(`/api/buy/${address}/${slug}`);
+    await axios.post(`/api/products/${product.id}/buy`, { amount: quantity });
+
+    setLoading(false);
   };
 
   if (!product && !loading) {
@@ -59,7 +63,7 @@ const CheckoutContent = () => {
         <TailSpin
           ariaLabel="loading-indicator"
           color="#111"
-          height={40}
+          width={40}
           height={40}
         />
       </Loading>
