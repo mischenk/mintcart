@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { styled } from "@stitches/react";
 import axios from "axios";
 import { ethers } from "ethers";
+import { TailSpin } from "react-loader-spinner";
 
 import { getProductContract } from "../../utils";
 import {
@@ -53,7 +54,16 @@ const CheckoutContent = () => {
   }
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <Loading>
+        <TailSpin
+          ariaLabel="loading-indicator"
+          color="#111"
+          height={40}
+          height={40}
+        />
+      </Loading>
+    );
   }
 
   const placeOrder = async (e) => {
@@ -114,6 +124,14 @@ const CheckoutContent = () => {
     </form>
   );
 };
+
+const Loading = styled("div", {
+  width: "100%",
+  height: "100%",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+});
 
 const ProductHeader = styled("div", {
   display: "flex",

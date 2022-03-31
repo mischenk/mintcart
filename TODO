@@ -1,9 +1,10 @@
-set up firebase to store products + sales
+set up firebase to store sales
 
-add spinners
 check slug uniqueness
 edit product
 delete product
+remove product factory contract
+add spinners
 add image
 add recipient
 fix switch account event listener
