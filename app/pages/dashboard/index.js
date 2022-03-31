@@ -2,21 +2,16 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { styled } from "@stitches/react";
 import axios from "axios";
+import { TailSpin } from "react-loader-spinner";
 
 import Layout from "../../components/Layout";
 import Button from "../../components/ui/Button";
 import ConnectWallet from "../../components/ConnectWallet";
 import {
   useChainId,
-  useSigner,
   useAddress,
   Web3Provider,
 } from "../../context/Web3Context";
-import {
-  getProductFactoryContract,
-  getProductContract,
-  parseEthers,
-} from "../../utils";
 
 const DashboardContent = () => {
   const [products, setProducts] = useState([]);
@@ -39,7 +34,14 @@ const DashboardContent = () => {
   }
 
   return loading ? (
-    <Loading>Loading ...</Loading>
+    <Loading>
+      <TailSpin
+        ariaLabel="loading-indicator"
+        color="#111"
+        height={40}
+        height={40}
+      />
+    </Loading>
   ) : (
     <div>
       <PageTitle>Products</PageTitle>
@@ -111,8 +113,11 @@ const ProductTable = styled("table", {
 });
 
 const Loading = styled("div", {
-  padding: "1rem 0",
-  marginBottom: "2rem",
+  width: "100%",
+  height: "100%",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
 });
 
 const NoProductsMsg = styled("div", {

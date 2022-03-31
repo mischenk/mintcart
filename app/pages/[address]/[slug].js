@@ -4,7 +4,7 @@ import { styled } from "@stitches/react";
 import axios from "axios";
 import { ethers } from "ethers";
 
-import { getProductFactoryContract, getProductContract } from "../../utils";
+import { getProductContract } from "../../utils";
 import {
   Web3Provider,
   useSigner,
