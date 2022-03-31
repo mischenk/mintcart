@@ -1,20 +1,26 @@
 import { collection, getDocs, query, where } from "firebase/firestore";
+import { useLayoutEffect } from "react";
 
-import { database } from "../../../../firebaseConfig";
+import { database } from "../../../../../../firebaseConfig";
 
 export default function handler(req, res) {
   if (req.method == "GET") {
-    const { seller, slug } = req.query;
+    const { chainId, seller, slug } = req.query;
     const productsRef = collection(database, "products");
     const q = query(
       productsRef,
+      where("chainId", "==", Number(chainId)),
       where("seller", "==", seller.toLowerCase()),
       where("slug", "==", slug.toLowerCase())
     );
 
     return getDocs(q)
       .then((data) => {
-        const product = data.docs ? data.docs[0].data() : {};
+        if (!data.docs.length) {
+          return res.status(404).json({ message: "Product not found" });
+        }
+
+        const product = data.docs[0].data();
         res.status(200).json({
           product,
         });

@@ -28,7 +28,7 @@ const DashboardContent = () => {
   useEffect(() => {
     if (!chainId || !address) return;
 
-    axios.get(`/api/products/${chainId}/${address}`).then((result) => {
+    axios.get(`/api/${chainId}/products/${address}`).then((result) => {
       setProducts(result.data.products);
       setLoading(false);
     });

@@ -1,6 +1,5 @@
 import { ethers } from "ethers";
 import { create as ipfsHttpClient } from "ipfs-http-client";
-import axios from "axios";
 
 import { contractAddressesByNetworkId, ipfsBaseUri } from "./constants";
 import ProductFactoryArtifact from "./artifacts/contracts/ProductFactory.sol/ProductFactory.json";

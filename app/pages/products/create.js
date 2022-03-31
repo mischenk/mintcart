@@ -31,7 +31,7 @@ const CreateProductContent = () => {
 
     // Deploy product contract
     const contract = await getProductFactoryContract(chainId, signer);
-    await contract.create(
+    const tx = await contract.create(
       tokenUri,
       slug.value,
       address,
@@ -39,11 +39,11 @@ const CreateProductContent = () => {
       supply.value
     );
 
+    await tx.wait();
+
     // Save product data to db
-    await axios.post("/api/products", {
+    await axios.post(`/api/${chainId}/products/${address}`, {
       contract: contract.address,
-      chainId,
-      seller: address,
       name: name.value,
       description: description.value,
       slug: slug.value,

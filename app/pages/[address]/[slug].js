@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { styled } from "@stitches/react";
 import axios from "axios";
+import { ethers } from "ethers";
 
 import { getProductFactoryContract, getProductContract } from "../../utils";
 import {
@@ -25,16 +26,16 @@ const CheckoutContent = () => {
   const { address, slug } = router.query;
 
   useEffect(() => {
-    if (!address || !slug) return;
+    if (!chainId || !address || !slug) return;
 
-    axios.get(`/api/store/${address}/${slug}`).then((result) => {
+    axios.get(`/api/${chainId}/products/${address}/${slug}`).then((result) => {
       setProduct(result.data.product);
       setLoading(false);
     });
-  }, [address, slug]);
+  }, [chainId, address, slug]);
 
   const buyProduct = async () => {
-    const contract = await getProductFactoryContract(chainId, signer);
+    const contract = await getProductContract(address, signer);
     const value = ethers.utils.parseUnits(
       (product.price * quantity).toString(),
       "ether"
