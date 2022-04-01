@@ -1,0 +1,84 @@
+const { expect } = require("chai");
+const { ethers } = require("hardhat");
+
+describe("ProfitSharingToken", function () {
+  let Product,
+    product,
+    addr1,
+    addr2,
+    addr3,
+    addr4,
+    addr5,
+    maxSupply,
+    initialSupply;
+
+  beforeEach(async () => {
+    [owner, addr1, addr2, addr3, addr4, addr5] = await ethers.getSigners();
+    maxSupply = 1000000;
+    initialSupply = 500000;
+    tokenPrice = 1000000000000000;
+
+    ProfitSharingToken = await ethers.getContractFactory("ProfitSharingToken");
+    profitSharingToken = await ProfitSharingToken.deploy(
+      maxSupply,
+      initialSupply
+    );
+    await profitSharingToken.deployed();
+  });
+
+  it("Deployment", async function () {
+    expect(await profitSharingToken.totalSupply()).to.equal(initialSupply);
+  });
+
+  it("Should add founder", async function () {
+    await profitSharingToken.addOwner(addr1.address);
+    expect(await profitSharingToken.totalHolders()).to.equal(2);
+    await profitSharingToken.addOwner(addr2.address);
+    expect(await profitSharingToken.totalHolders()).to.equal(3);
+  });
+
+  it("Should payout profits", async function () {
+    expect(await profitSharingToken.balanceOf(owner.address)).to.equal(500000);
+    await profitSharingToken.addOwner(addr1.address);
+    await profitSharingToken.addOwner(addr2.address);
+    await profitSharingToken.addOwner(addr3.address);
+    expect(await profitSharingToken.balanceOf(owner.address)).to.equal(500000);
+    await profitSharingToken.transfer(addr1.address, 200000);
+    await profitSharingToken.transfer(addr2.address, 150000);
+    await profitSharingToken.transfer(addr3.address, 150000);
+    await profitSharingToken.shareProfits({
+      value: ethers.utils.parseEther("10"),
+    });
+    expect(await profitSharingToken.profitBalanceOf(owner.address)).to.equal(0);
+    expect(await profitSharingToken.profitBalanceOf(addr1.address)).to.equal(
+      ethers.utils.parseEther("4")
+    );
+    expect(await profitSharingToken.profitBalanceOf(addr2.address)).to.equal(
+      ethers.utils.parseEther("3")
+    );
+    expect(await profitSharingToken.profitBalanceOf(addr3.address)).to.equal(
+      ethers.utils.parseEther("3")
+    );
+  });
+
+  it("Should invest", async function () {
+    await profitSharingToken
+      .connect(addr1)
+      .invest({ value: ethers.utils.parseEther("500") });
+    expect(await profitSharingToken.balanceOf(addr1.address)).to.equal(
+      initialSupply
+    );
+  });
+
+  it("Should NOT invest", async function () {
+    await expect(
+      profitSharingToken.connect(addr1).invest({ value: tokenPrice - 1 })
+    ).to.be.revertedWith("Error, you must buy at least 1 token");
+    await profitSharingToken
+      .connect(addr1)
+      .invest({ value: ethers.utils.parseEther("500") });
+    await expect(
+      profitSharingToken.connect(addr1).invest({ value: tokenPrice })
+    ).to.be.revertedWith("Error, insufficient token supply");
+  });
+});

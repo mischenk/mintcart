@@ -1,14 +1,19 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.4;
 
-import "./ProductV2.sol";
+import "./Product.sol";
+import "./ProfitSharingToken.sol";
 
 contract ProductFactory {
+    address profitSharingToken;
+
     address[] allProducts;
     mapping(address => address[]) productsBySeller;
     mapping(address => mapping(string => address)) productsBySlug;
 
-    constructor() {}
+    constructor(address _profitSharingToken) {
+        profitSharingToken = _profitSharingToken;
+    }
 
     function create(
         string memory tokenUri,
@@ -19,7 +24,13 @@ contract ProductFactory {
     ) external returns (address) {
         require(supply > 0, "Error, supply must be at least 1");
 
-        Product product = new Product(tokenUri, seller, price, supply);
+        Product product = new Product(
+            tokenUri,
+            seller,
+            price,
+            supply,
+            profitSharingToken
+        );
 
         address addr = address(product);
 

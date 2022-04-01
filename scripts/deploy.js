@@ -16,20 +16,37 @@ function updateEnvVar(key, value) {
 }
 
 async function main() {
+  const ProfitSharingToken = await ethers.getContractFactory(
+    "ProfitSharingToken"
+  );
+  const profitSharingToken = await ProfitSharingToken.deploy(1000000, 500000);
+  await profitSharingToken.deployed();
+
+  console.log(
+    "ProfitSharingToken deployed to:",
+    profitSharingToken.address,
+    network.name
+  );
+
   const ProductFactory = await ethers.getContractFactory("ProductFactory");
-  const contract = await ProductFactory.deploy();
+  const productFactory = await ProductFactory.deploy(
+    profitSharingToken.address
+  );
+  await productFactory.deployed();
 
-  await contract.deployed();
-
-  console.log("ProductFactory deployed to:", contract.address, network.name);
+  console.log(
+    "ProductFactory deployed to:",
+    productFactory.address,
+    network.name
+  );
 
   if (network.name === "localhost") {
-    updateEnvVar("NEXT_PUBLIC_LOCAL_ADDRESS", contract.address);
+    updateEnvVar("NEXT_PUBLIC_LOCAL_ADDRESS", productFactory.address);
   } else {
     fs.appendFileSync(
       "app/artifacts/addresses.js",
       `module.exports.${network.name.toUpperCase()}_ADDRESS = "${
-        contract.address
+        productFactory.address
       }";\n`
     );
   }
