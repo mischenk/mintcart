@@ -1,4 +1,3 @@
-import { styled } from "@stitches/react";
 import { Web3Provider, useConnect } from "../context/Web3Context";
 
 import Button from "./ui/Button";
@@ -8,23 +7,17 @@ const ConnectWallet = () => {
 
   return (
     <Web3Provider>
-      <Container>
-        <>
-          <h2>Connect</h2>
-          <p>Connect your wallet to access the Dashboard.</p>
-          <Button onClick={connect}>Connect Wallet</Button>
-        </>
-      </Container>
+      <div className="flex items-center justify-center flex-col h-[calc(100vh-232px)]">
+        <h2 className="mb-4  text-4xl font-bold max-w-4xl	text-center">
+          Connect
+        </h2>
+        <p className="mb-4  max-w-2xl text-center">
+          Connect your wallet to access the Dashboard.
+        </p>
+        <Button onClick={connect}>Connect Wallet</Button>
+      </div>
     </Web3Provider>
   );
 };
-
-const Container = styled("div", {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  flexDirection: "column",
-  height: "100vh",
-});
 
 export default ConnectWallet;
