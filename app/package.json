@@ -10,7 +10,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@stitches/react": "^1.2.7",
     "axios": "^0.26.1",
     "ethers": "^5.6.0",
     "firebase": "^9.6.10",
