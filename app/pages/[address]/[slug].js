@@ -1,17 +1,12 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { styled } from "@stitches/react";
+
 import axios from "axios";
 import { ethers } from "ethers";
-import { TailSpin } from "react-loader-spinner";
+import Loading from "../../components/ui/Loading";
 
 import { getProductContract } from "../../utils";
-import {
-  Web3Provider,
-  useSigner,
-  useChainId,
-  useAddress,
-} from "../../context/Web3Context";
+import { Web3Provider, useSigner, useChainId } from "../../context/Web3Context";
 
 import SimpleLayout from "../../components/SimpleLayout";
 import Button from "../../components/ui/Button";
@@ -58,16 +53,7 @@ const CheckoutContent = () => {
   }
 
   if (loading) {
-    return (
-      <Loading>
-        <TailSpin
-          ariaLabel="loading-indicator"
-          color="#111"
-          width={40}
-          height={40}
-        />
-      </Loading>
-    );
+    return <Loading />;
   }
 
   const placeOrder = async (e) => {
@@ -80,148 +66,67 @@ const CheckoutContent = () => {
   return (
     <form>
       <>
-        <ProductHeader>
+        <div className="flex mb-8 text-2xl font-bold">
           <div>
-            <ProductName>{product.name}</ProductName>
-            <ProductSales>
+            <div className="mb-2 uppercase">{product.name}</div>
+            <div className="text-base font-light">
               {product.sold} out of {product.supply} sold.
-            </ProductSales>
+            </div>
           </div>
-          <ProductPrice>
-            {product.price} <span>ETH</span>
-          </ProductPrice>
-        </ProductHeader>
+          <div className="flex grow justify-end align-center font-bold">
+            {product.price}{" "}
+            <span className="mt-1 ml-1 text-base font-light">ETH</span>
+          </div>
+        </div>
 
         {product.description ? (
-          <ProductDescription>{product.description}</ProductDescription>
+          <div className="mb-8">{product.description}</div>
         ) : null}
       </>
 
-      <ContactContainer>
-        <input type="email" name="email" placeholder="Email Address" />
-        <input type="text" name="name" placeholder="Full Name" />
-      </ContactContainer>
+      <div className="flex flex-wrap mb-8">
+        <input
+          className="mb-4 p-2 border border-slate-500 text-base w-full"
+          type="email"
+          name="email"
+          placeholder="Email Address"
+        />
+        <input
+          className="mb-4 p-2 border border-slate-500 text-base w-full"
+          type="text"
+          name="name"
+          placeholder="Full Name"
+        />
+      </div>
 
-      <OrderSummary>
-        <TotalLabel>Total</TotalLabel>
-        <TotalPrice>
-          {quantity ? product.price * quantity : 0} <span>ETH</span>
-        </TotalPrice>
-      </OrderSummary>
+      <div className="flex mb-4 text-xl">
+        <div className="flex flex-col align-center w-full">Total</div>
+        <div className="flex grow justify-end align-center font-bold">
+          {quantity ? product.price * quantity : 0}{" "}
+          <span className="mt-1 ml-1 text-sm font-light">ETH</span>
+        </div>
+      </div>
 
       {product.sold < product.supply ? (
-        <PurchaseContainer>
-          <QuantityInput
+        <div className="flex space-between">
+          <input
+            className="mr-4 py-2 pr-2 pl-4 center border border-black w-24 h-10 text-center text-sm"
             type="number"
             min={1}
             max={product.supply - product.sold}
             value={quantity}
             onChange={(e) => setQuantity(parseInt(e.target.value))}
           />
-          <Button style="wide" onClick={placeOrder}>
+          <Button className="w-full" onClick={placeOrder}>
             Place your order
           </Button>
-        </PurchaseContainer>
+        </div>
       ) : (
         <Button disabled>Sold out</Button>
       )}
     </form>
   );
 };
-
-const Loading = styled("div", {
-  width: "100%",
-  height: "100%",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-});
-
-const ProductHeader = styled("div", {
-  display: "flex",
-  marginBottom: "2rem",
-  fontSize: "$xxl",
-  fontWeight: "$bolder",
-});
-
-const ProductName = styled("div", {
-  marginBottom: "0.5rem",
-  textTransform: "uppercase",
-});
-
-const ProductSales = styled("div", {
-  fontWeight: "$lighter",
-  fontSize: "1rem",
-});
-
-const ProductDescription = styled("div", {
-  marginBottom: "2rem",
-});
-
-const ProductPrice = styled("div", {
-  fontWeight: "$bold",
-  display: "flex",
-  flexGrow: 1,
-  justifyContent: "flex-end",
-  alignItems: "center",
-  fontWeight: "$bold",
-  span: {
-    marginTop: "2px",
-    marginLeft: "3px",
-    fontSize: "$base",
-    fontWeight: "$light",
-  },
-});
-
-const ContactContainer = styled("div", {
-  display: "flex",
-  flexWrap: "wrap",
-  marginBottom: "2rem",
-  input: {
-    marginBottom: "1rem",
-    padding: "0.5rem",
-    fontSize: "1rem",
-    width: "100%",
-  },
-});
-
-const OrderSummary = styled("div", {
-  display: "flex",
-  marginBottom: "1rem",
-  fontSize: "$xl",
-});
-
-const TotalLabel = styled("div", {});
-
-const TotalPrice = styled("div", {
-  display: "flex",
-  flexGrow: 1,
-  justifyContent: "flex-end",
-  alignItems: "center",
-  fontWeight: "$bold",
-  span: {
-    marginTop: "2px",
-    marginLeft: "3px",
-    fontSize: "$sm",
-    fontWeight: "$light",
-  },
-});
-
-const PurchaseContainer = styled("div", {
-  display: "flex",
-  justifyContent: "space-between",
-});
-
-const QuantityInput = styled("input", {
-  width: "100px",
-  marginRight: "1rem",
-  padding: "0.5rem 0.3rem 0.5rem 1rem",
-  textAlign: "center",
-  borderStyle: "solid",
-  borderWidth: "1px",
-  borderColor: "black",
-  height: "$10",
-});
 
 const Checkout = (props) => {
   return (

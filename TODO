@@ -1,16 +1,27 @@
-set up firebase to store sales
-
-show order confirmation
-email order confirmation
-check slug uniqueness
-edit product
-delete product
-remove product factory contract
-add spinners
-add image
-add recipient
-fix switch account event listener
-add wallet modal
-use signature request for log in
-add UI icons
 use tailwind
+mobile 
+
+orders
+  show order confirmation
+  orders list
+  view order
+  email order confirmation
+
+products
+  add product image
+  edit product
+  delete product
+  check slug uniqueness
+  remove product factory contract
+  add recipient
+
+settings
+  marketplace name
+  logo
+  support contact
+  custom domain
+
+web3
+  fix switch account event listener
+  add wallet modal
+  use signature request for log in

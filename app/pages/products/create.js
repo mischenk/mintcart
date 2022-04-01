@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
-import { styled } from "@stitches/react";
+import Link from "next/link";
+
 import axios from "axios";
-import { TailSpin } from "react-loader-spinner";
 
 import { ipfsAdd, getTokenUri, getProductFactoryContract } from "../../utils";
 import {
@@ -12,7 +12,14 @@ import {
   useDisplayAddress,
   useChainId,
 } from "../../context/Web3Context";
+
 import Layout from "../../components/Layout";
+import Loading from "../../components/ui/Loading";
+import Label from "../../components/ui/Label";
+import Input from "../../components/ui/Input";
+import Textarea from "../../components/ui/Textarea";
+import Button from "../../components/ui/Button";
+import { use } from "chai";
 
 const CreateProductContent = () => {
   const [loading, setLoading] = useState(false);
@@ -63,122 +70,73 @@ const CreateProductContent = () => {
   };
 
   return loading ? (
-    <Loading>
-      <TailSpin
-        ariaLabel="loading-indicator"
-        color="#111"
-        width={40}
-        height={40}
-      />
-    </Loading>
+    <Loading />
   ) : (
-    <Form onSubmit={onSubmit}>
-      <InputGroup>
-        <Label htmlFor="name">Name</Label>
-        <Input id="name" name="name" type="text" required />
-      </InputGroup>
+    <form className="max-w-3xl" onSubmit={onSubmit}>
+      <div className="mb-6 pb-6 border-b border-b-gray-300">
+        <div className="mb-1">
+          <Label htmlFor="name">Name</Label>
+          <Input
+            id="name"
+            name="name"
+            type="text"
+            placeholder="Product name"
+            required
+          />
+        </div>
 
-      <InputGroup>
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
-          name="description"
-          placeholder="Add a description to your product"
-        />
-      </InputGroup>
-      <InputGroup>
-        <Label htmlFor="slug">URL</Label>
-        <SlugContainer>
-          <div>https://mintcart.xyz/{displayAddress}/</div>
-          <Input id="slug" name="slug" type="text" required />
-        </SlugContainer>
-      </InputGroup>
-      <InputGroup>
-        <Label htmlFor="price">Price</Label>
-        <Input
-          id="price"
-          name="price"
-          type="number"
-          min="0"
-          placeholder="Price"
-          required
-        />
-      </InputGroup>
-      <InputGroup>
-        <Label htmlFor="supply">Quantity</Label>
-        <Input
-          id="supply"
-          name="supply"
-          type="number"
-          min="0"
-          placeholder="Quantity"
-          required
-        />
-      </InputGroup>
+        <div className="mb-1">
+          <Label htmlFor="description">Description</Label>
+          <Textarea
+            id="description"
+            name="description"
+            placeholder="Add a description to your product"
+          />
+        </div>
+        <div className="mb-1">
+          <Label htmlFor="slug">URL</Label>
+          <div className="mb-4 pl-2 flex items-center bg-gray-300 text-gray-500 text-sm">
+            <div>https://mintcart.xyz/{displayAddress}/</div>
+            <Input
+              className="mb-0 ml-2 "
+              id="slug"
+              name="slug"
+              type="text"
+              required
+            />
+          </div>
+        </div>
+        <div className="mb-1">
+          <Label htmlFor="price">Price</Label>
+          <Input
+            id="price"
+            name="price"
+            type="number"
+            min="0"
+            placeholder="Price"
+            required
+          />
+        </div>
+        <div className="mb-1">
+          <Label htmlFor="supply">Supply</Label>
+          <Input
+            id="supply"
+            name="supply"
+            type="number"
+            min="0"
+            placeholder="Supply"
+            required
+          />
+        </div>
+      </div>
+
       <Button type="submit">Create product</Button>
-    </Form>
+      <Link href="/dashboard">
+        <a className="ml-6 text-sms underline">Cancel</a>
+      </Link>
+    </form>
   );
 };
-
-const Loading = styled("div", {
-  width: "100%",
-  height: "100%",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-});
-
-const Form = styled("form", {
-  maxWidth: "800px",
-});
-
-const InputGroup = styled("div", {
-  paddingBottom: "1rem",
-});
-
-const Label = styled("label", {
-  display: "block",
-  marginBottom: "0.5rem",
-  fontSize: "1.1rem",
-  fontWeight: 700,
-});
-
-const Input = styled("input", {
-  padding: "1rem",
-  width: "100%",
-  fontSize: "1.1rem",
-});
-
-const Textarea = styled("textarea", {
-  padding: "1rem",
-  width: "100%",
-  minHeight: "10rem",
-  fontSize: "1.1rem",
-});
-
-const SlugContainer = styled("div", {
-  display: "flex",
-  alignItems: "center",
-  backgroundColor: "#ccc",
-  color: "#555",
-  paddingLeft: "0.5rem",
-  input: {
-    marginLeft: "0.5rem",
-  },
-});
-
-const Button = styled("button", {
-  width: "100%",
-  padding: "1rem",
-  backgroundColor: "white",
-  color: "black",
-  fontSize: "1rem",
-  fontWeight: 700,
-  borderWidth: 1,
-  borderColor: "black",
-  borderRadius: "10px",
-  boxShadow: "none",
-});
 
 const CreateProduct = () => {
   return (
