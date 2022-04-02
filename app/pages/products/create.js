@@ -93,7 +93,7 @@ const CreateProductContent = () => {
             placeholder="Add a description to your product"
           />
         </div>
-        <div className="flex">
+        <div className="md:flex">
           <div className="mb-1 mr-4 grow">
             <Label htmlFor="price" className="">
               Price
