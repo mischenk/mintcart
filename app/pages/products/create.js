@@ -71,7 +71,8 @@ const CreateProductContent = () => {
   return loading ? (
     <Loading />
   ) : (
-    <form className="max-w-3xl" onSubmit={onSubmit}>
+    <form className="mx-auto w-full max-w-3xl" onSubmit={onSubmit}>
+      <h2 className="mb-8 md:mb-16 font-bold text-2xl">Create a new product</h2>
       <div className="mb-6 pb-6 border-b border-b-gray-300">
         <div className="mb-1">
           <Label htmlFor="name">Name</Label>
@@ -92,6 +93,32 @@ const CreateProductContent = () => {
             placeholder="Add a description to your product"
           />
         </div>
+        <div className="flex">
+          <div className="mb-1 mr-4 grow">
+            <Label htmlFor="price" className="">
+              Price
+            </Label>
+            <Input
+              id="price"
+              name="price"
+              type="number"
+              min="0"
+              placeholder="Price"
+              required
+            />
+          </div>
+          <div className="mb-1 grow">
+            <Label htmlFor="supply">Supply</Label>
+            <Input
+              id="supply"
+              name="supply"
+              type="number"
+              min="0"
+              placeholder="Supply"
+              required
+            />
+          </div>
+        </div>
         <div className="mb-1">
           <Label htmlFor="slug">URL</Label>
           <div className="mb-4 pl-2 flex items-center bg-gray-300 text-gray-500 text-sm">
@@ -104,28 +131,6 @@ const CreateProductContent = () => {
               required
             />
           </div>
-        </div>
-        <div className="mb-1">
-          <Label htmlFor="price">Price</Label>
-          <Input
-            id="price"
-            name="price"
-            type="number"
-            min="0"
-            placeholder="Price"
-            required
-          />
-        </div>
-        <div className="mb-1">
-          <Label htmlFor="supply">Supply</Label>
-          <Input
-            id="supply"
-            name="supply"
-            type="number"
-            min="0"
-            placeholder="Supply"
-            required
-          />
         </div>
       </div>
 

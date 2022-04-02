@@ -16,7 +16,7 @@ const HomeContent = () => {
   return (
     <div className="flex items-center justify-center flex-col h-[calc(100vh-232px)]">
       <h1 className="mb-10 text-7xl font-bold max-w-4xl	text-center">
-        Sell your products and services as NFTs.
+        Sell your products and services as NFTs
       </h1>
       <p className="mb-8 text-xl max-w-2xl text-center">
         Whether you sell digital products or services online, mintcart is the
