@@ -59,12 +59,22 @@ const CheckoutContent = () => {
   const placeOrder = async (e) => {
     e.preventDefault();
 
+    const { email, name } = e.target;
+
     await buyProduct();
+
+    await axios.post(`/api/orders`, {
+      productId: product.id,
+      email: email.value,
+      name: name.value,
+      amount: Number(quantity),
+    });
+
     location.reload();
   };
 
   return (
-    <form>
+    <form onSubmit={placeOrder}>
       <>
         <div className="flex mb-8 text-2xl font-bold">
           <div>
@@ -117,9 +127,7 @@ const CheckoutContent = () => {
             value={quantity}
             onChange={(e) => setQuantity(parseInt(e.target.value))}
           />
-          <Button className="w-full" onClick={placeOrder}>
-            Place your order
-          </Button>
+          <Button className="w-full">Place your order</Button>
         </div>
       ) : (
         <Button disabled>Sold out</Button>
