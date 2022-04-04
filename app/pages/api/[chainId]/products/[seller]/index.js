@@ -44,6 +44,7 @@ export default function handler(req, res) {
       price: Number(price),
       supply: Number(supply),
       sold: 0,
+      created: new Date().toISOString(),
     })
       .then(() => {
         res.status(200).json({ success: true });
