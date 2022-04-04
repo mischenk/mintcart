@@ -11,6 +11,10 @@ module.exports = {
       url: `https://polygon-mumbai.infura.io/v3/${process.env.INFURA_ID}`,
       accounts: [process.env.PRIVATE_KEY],
     },
+    rinkeby: {
+      url: `https://rinkeby.infura.io/v3/${process.env.INFURA_ID}`,
+      accounts: [process.env.PRIVATE_KEY],
+    },
     /*
     matic: {
       url: `https://polygon-mainnet.infura.io/v3/${process.env.INFURA_ID}`,

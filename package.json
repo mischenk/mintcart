@@ -7,6 +7,7 @@
     "build": "npx hardhat compile",
     "dev": "npx hardhat node",
     "migrate:local": "npx hardhat run --network localhost scripts/deploy.js",
+    "migrate:rinkeby": "npx hardhat run --network rinkeby scripts/deploy.js",
     "migrate:mumbai": "npx hardhat run --network mumbai scripts/deploy.js",
     "migrate:matic": "npx hardhat run --network matic scripts/deploy.js",
     "test": "npx hardhat test",
