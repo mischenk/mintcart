@@ -90,12 +90,16 @@ contract ProfitSharingToken is ERC20, Ownable, ReentrancyGuard {
         payable(msg.sender).sendValue(profit);
     }
 
-    function shareProfits() external payable {
+    function shareProfits(uint256 value) internal {
         for (uint256 i = 0; i < _totalHolders.current(); i++) {
             address addr = _holders[i];
             uint256 balance = balanceOf(addr);
-            uint256 dividend = msg.value.mul(balance).div(totalSupply());
+            uint256 dividend = value.mul(balance).div(totalSupply());
             _profits[addr] = dividend;
         }
+    }
+
+    receive() external payable {
+        shareProfits(msg.value);
     }
 }
