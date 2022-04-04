@@ -28,8 +28,8 @@ contract ProfitSharingToken is ERC20, Ownable, ReentrancyGuard {
     {
         require(initialSupply > 0, "Intial supply must be greater than 0");
         require(
-            maxSupply > initialSupply,
-            "Max supply must be greater than initial supply"
+            maxSupply >= initialSupply,
+            "Max supply must be >= initial supply"
         );
 
         _maxSupply = maxSupply;

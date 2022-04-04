@@ -1,15 +1,31 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
-const ProductArtifact = require("../artifacts/contracts/ProductV2.sol/Product.json");
+const ProductArtifact = require("../app/artifacts/contracts/Product.sol/Product.json");
 
 describe("Products", () => {
-  let Product, product, addr1, addr2, addr3, addr4, addr5;
+  let productFactory,
+    profitSharingToken,
+    owner,
+    addr1,
+    addr2,
+    addr3,
+    addr4,
+    addr5;
 
   beforeEach(async () => {
     [owner, addr1, addr2, addr3, addr4, addr5] = await ethers.getSigners();
-    ProductFactory = await ethers.getContractFactory("ProductFactory");
-    productFactory = await ProductFactory.deploy();
+    const ProfitSharingToken = await ethers.getContractFactory(
+      "ProfitSharingToken"
+    );
+    profitSharingToken = await ProfitSharingToken.deploy(1, 1);
+
+    await profitSharingToken.deployed();
+
+    const ProductFactory = await ethers.getContractFactory("ProductFactory");
+    productFactory = await ProductFactory.deploy(profitSharingToken.address);
+
+    await productFactory.deployed();
   });
 
   describe("Create products", () => {
@@ -17,7 +33,7 @@ describe("Products", () => {
       const tokenUri = "https://ipfs.infura.io/ipfs/";
       const slug = "test";
       const seller = owner.address;
-      const price = 1;
+      const price = ethers.utils.parseEther("1");
       const supply = 10;
       await productFactory.create(tokenUri, slug, seller, price, supply);
 
@@ -29,9 +45,10 @@ describe("Products", () => {
         ProductArtifact.abi,
         owner
       );
-      expect(await product.tokenUri()).to.equal(tokenUri);
-      expect(await product.price()).to.equal(price);
-      expect(await product.supply()).to.equal(supply);
+      [_tokenUri, _seller, _price, _supply] = await product.get();
+      expect(_tokenUri).to.equal(tokenUri);
+      expect(_price).to.equal(price);
+      expect(_supply).to.equal(supply);
     });
 
     it("Should not create product unless supply > 0", async () => {
@@ -40,7 +57,7 @@ describe("Products", () => {
           "https://ipfs.infura.io/ipfs/",
           "test",
           owner.address,
-          1,
+          ethers.utils.parseEther("1"),
           0
         )
       ).to.be.revertedWith("Error, supply must be at least 1");
@@ -55,7 +72,7 @@ describe("Products", () => {
         "https://ipfs.infura.io/ipfs/",
         "test",
         owner.address,
-        1,
+        ethers.utils.parseEther("1"),
         10
       );
       products = await productFactory.fetchSellerProducts(addr1.address);
@@ -66,7 +83,7 @@ describe("Products", () => {
         "https://ipfs.infura.io/ipfs/",
         "test",
         addr1.address,
-        1,
+        ethers.utils.parseEther("1"),
         10
       );
       products = await productFactory.fetchSellerProducts(addr1.address);
@@ -80,7 +97,7 @@ describe("Products", () => {
         "https://ipfs.infura.io/ipfs/",
         "test1",
         owner.address,
-        1,
+        ethers.utils.parseEther("1"),
         10
       );
       products = await productFactory.fetchSellerProducts(owner.address);
@@ -99,7 +116,7 @@ describe("Products", () => {
         "https://ipfs.infura.io/ipfs/",
         "test1",
         owner.address,
-        1,
+        ethers.utils.parseEther("1"),
         10
       );
       products = product = await productFactory.fetchProductBySlug(
@@ -119,7 +136,7 @@ describe("Products", () => {
         "https://ipfs.infura.io/ipfs/",
         "test",
         addr1.address,
-        1,
+        ethers.utils.parseEther("1"),
         10
       );
 
@@ -136,7 +153,7 @@ describe("Products", () => {
         "https://ipfs.infura.io/ipfs/",
         "test",
         owner.address,
-        1,
+        ethers.utils.parseEther("1"),
         10
       );
       const [productAddr] = await productFactory.fetchProducts();
@@ -146,9 +163,10 @@ describe("Products", () => {
         owner
       );
       await product.connect(addr1).buy(2, {
-        value: 2,
+        value: ethers.utils.parseEther("2"),
       });
-      expect(await product.sold()).to.equal(2);
+      const [tokenUri, seller, price, supply, sold] = await product.get();
+      expect(sold).to.equal(2);
     });
   });
 
@@ -157,7 +175,7 @@ describe("Products", () => {
       "https://ipfs.infura.io/ipfs/",
       "test",
       owner.address,
-      1,
+      ethers.utils.parseEther("1"),
       10
     );
     const [productAddr] = await productFactory.fetchProducts();
@@ -168,7 +186,7 @@ describe("Products", () => {
     );
     await expect(
       product.connect(addr1).buy(2, {
-        value: 1,
+        value: ethers.utils.parseEther("1"),
       })
     ).to.be.revertedWith("Error, product costs more");
   });
@@ -178,7 +196,7 @@ describe("Products", () => {
       "https://ipfs.infura.io/ipfs/",
       "test",
       owner.address,
-      1,
+      ethers.utils.parseEther("1"),
       1
     );
     const [productAddr] = await productFactory.fetchProducts();
@@ -189,8 +207,43 @@ describe("Products", () => {
     );
     await expect(
       product.connect(addr1).buy(2, {
-        value: 2,
+        value: ethers.utils.parseEther("2"),
       })
     ).to.be.revertedWith("Error, amount is higher than available supply");
+  });
+
+  it("It should split profits", async () => {
+    await productFactory.create(
+      "https://ipfs.infura.io/ipfs/",
+      "test",
+      addr1.address,
+      ethers.utils.parseEther("100"),
+      10
+    );
+
+    const [productAddr] = await productFactory.connect(addr1).fetchProducts();
+    const product = new ethers.Contract(
+      productAddr,
+      ProductArtifact.abi,
+      addr2
+    );
+
+    [tokenUri, seller, price, supply, sold, fee] = await product.get();
+    expect(fee).to.equal(ethers.utils.parseEther("5"));
+
+    const initialBalance = await ethers.provider.getBalance(addr1.address);
+
+    await product.connect(addr2).buy(1, {
+      value: ethers.utils.parseEther("100"),
+    });
+
+    const profit = await profitSharingToken.profitBalanceOf(owner.address);
+    expect(profit).to.equal(ethers.utils.parseEther("5"));
+
+    const balanceAfter = await ethers.provider.getBalance(addr1.address);
+
+    expect(balanceAfter.sub(initialBalance)).to.equal(
+      ethers.utils.parseEther("95")
+    );
   });
 });

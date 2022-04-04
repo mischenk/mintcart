@@ -8,6 +8,8 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+import "hardhat/console.sol";
+
 import "./ProfitSharingToken.sol";
 
 contract Product is ERC1155, ERC1155Holder, Ownable {
@@ -63,10 +65,11 @@ contract Product is ERC1155, ERC1155Holder, Ownable {
             address,
             uint256,
             uint256,
+            uint256,
             uint256
         )
     {
-        return (tokenUri, seller, price, supply, sold);
+        return (tokenUri, seller, price, supply, sold, fee);
     }
 
     function buy(uint256 amount) external payable returns (uint256) {
@@ -88,6 +91,7 @@ contract Product is ERC1155, ERC1155Holder, Ownable {
         _mint(msg.sender, newTokenId, amount, "");
 
         payable(profitSharingToken).sendValue(fee);
+        payable(seller).sendValue(price.sub(fee));
 
         return newTokenId;
     }
