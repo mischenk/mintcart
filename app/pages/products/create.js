@@ -101,8 +101,7 @@ const CreateProductContent = () => {
             <Input
               id="price"
               name="price"
-              type="number"
-              min="0"
+              type="text"
               placeholder="Price"
               required
             />

@@ -15,6 +15,18 @@ contract ProductFactory {
         profitSharingToken = _profitSharingToken;
     }
 
+    event ProductCreated(
+        uint256 indexed productId,
+        address productContract,
+        string tokenUri,
+        string slug,
+        address seller,
+        uint256 price,
+        uint256 supply
+    );
+
+    event ProductSold(address productContract, uint256 amount);
+
     function create(
         string memory tokenUri,
         string memory slug,
@@ -38,7 +50,30 @@ contract ProductFactory {
         productsBySeller[seller].push(addr);
         productsBySlug[seller][slug] = addr;
 
+        emit ProductCreated(
+            allProducts.length,
+            addr,
+            tokenUri,
+            slug,
+            seller,
+            price,
+            supply
+        );
+
         return addr;
+    }
+
+    function buy(
+        address seller,
+        string memory slug,
+        uint256 amount
+    ) external payable returns (uint256) {
+        address addr = productsBySlug[seller][slug];
+        Product product = Product(addr);
+
+        emit ProductSold(addr, amount);
+
+        return product.buy(amount);
     }
 
     function fetchProducts() public view returns (address[] memory) {

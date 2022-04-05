@@ -1,19 +1,23 @@
-use tailwind
-mobile 
+fetch data from subgraph
+convert slug to bytes32
 
 orders
-  show order confirmation
-  orders list
+  +show order confirmation
+  +orders list
   view order
   email order confirmation
 
 products
-  add product image
-  edit product
-  delete product
+  +add product image
+  +edit product
+  +delete product
   check slug uniqueness
-  remove product factory contract
+  +remove product factory contract
   add recipient
+
+profit-sharing
+  +explain 
+  investment form
 
 settings
   marketplace name

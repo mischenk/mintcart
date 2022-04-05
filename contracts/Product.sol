@@ -27,6 +27,13 @@ contract Product is ERC1155, ERC1155Holder, Ownable {
     uint256 fee;
     address profitSharingToken;
 
+    event ProductSold(
+        uint256 indexed tokenId,
+        uint256 price,
+        uint256 amount,
+        address buyer
+    );
+
     constructor(
         string memory _tokenUri,
         address _seller,
@@ -92,6 +99,8 @@ contract Product is ERC1155, ERC1155Holder, Ownable {
 
         payable(profitSharingToken).sendValue(fee);
         payable(seller).sendValue(price.sub(fee));
+
+        emit ProductSold(newTokenId, price, amount, msg.sender);
 
         return newTokenId;
     }
