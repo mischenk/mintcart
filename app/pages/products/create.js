@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
-
+import { ethers } from "ethers";
 import axios from "axios";
 
 import { ipfsAdd, getTokenUri, getProductFactoryContract } from "../../utils";
@@ -41,13 +41,16 @@ const CreateProductContent = () => {
 
     const tokenUri = getTokenUri(ipfsHash);
 
+    const priceEther = ethers.utils.parseUnits(price.value, "ether");
+
     // Deploy product contract
     const contract = await getProductFactoryContract(chainId, signer);
+
     const tx = await contract.create(
       tokenUri,
       slug.value,
       address,
-      price.value,
+      priceEther,
       supply.value
     );
 
