@@ -25,8 +25,6 @@ contract ProductFactory {
         uint256 supply
     );
 
-    event ProductSold(address productContract, uint256 amount);
-
     function create(
         string memory tokenUri,
         string memory slug,
@@ -70,8 +68,6 @@ contract ProductFactory {
     ) external payable returns (uint256) {
         address addr = productsBySlug[seller][slug];
         Product product = Product(addr);
-
-        emit ProductSold(addr, amount);
 
         return product.buy(amount);
     }
