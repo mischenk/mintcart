@@ -100,12 +100,14 @@ const CheckoutContent = () => {
           type="email"
           name="email"
           placeholder="Email Address"
+          required
         />
         <input
           className="mb-4 p-2 border border-slate-500 text-base w-full"
           type="text"
           name="name"
           placeholder="Full Name"
+          required
         />
       </div>
 
@@ -125,6 +127,7 @@ const CheckoutContent = () => {
             min={1}
             max={product.supply - product.sold}
             value={quantity}
+            required
             onChange={(e) => setQuantity(parseInt(e.target.value))}
           />
           <Button className="w-full">Place your order</Button>
