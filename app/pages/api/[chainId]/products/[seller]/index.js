@@ -44,6 +44,7 @@ export default function handler(req, res) {
       price: Number(price),
       supply: Number(supply),
       sold: 0,
+      orders: [],
       created: new Date().toISOString(),
     })
       .then(() => {

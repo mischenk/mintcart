@@ -1,11 +1,14 @@
-import { collection, addDoc } from "firebase/firestore";
+import { doc, collection, addDoc } from "firebase/firestore";
 
 import { database } from "../../../firebaseConfig";
 
 export default function handler(req, res) {
   if (req.method == "POST") {
-    const urlCol = collection(database, "orders");
-    return addDoc(urlCol, {
+    const { productId } = req.body;
+    const ordersCol = collection(database, "products", productId, "orders");
+    //const ordersCol = collection(productDoc, "orders");
+
+    return addDoc(ordersCol, {
       ...req.body,
       created: new Date().toISOString(),
     })
