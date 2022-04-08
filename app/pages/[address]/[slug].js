@@ -59,14 +59,14 @@ const CheckoutContent = () => {
 
     await buyProduct();
 
-    const orderId = await axios.post(`/api/orders`, {
+    const order = await axios.post(`/api/orders`, {
       productId: product.id,
       email: email.value,
       name: name.value,
       amount: Number(quantity),
     });
 
-    router.push(`/order-summary/${product.id}/${orderId}`);
+    router.push(`/order-summary/${product.id}/${order.data.orderId}`);
   };
 
   return (
