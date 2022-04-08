@@ -1,22 +1,40 @@
-import { doc, collection, addDoc } from "firebase/firestore";
+import {
+  doc,
+  collection,
+  getDoc,
+  updateDoc,
+  addDoc,
+  increment,
+} from "firebase/firestore";
 
 import { database } from "../../../firebaseConfig";
 
-export default function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method == "POST") {
-    const { productId } = req.body;
-    const ordersCol = collection(database, "products", productId, "orders");
-    //const ordersCol = collection(productDoc, "orders");
+    const { productId, amount } = req.body;
 
-    return addDoc(ordersCol, {
+    const docRef = doc(database, "products", productId);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) {
+      return res.status(400).json({ message: "Product not found" });
+    }
+
+    const product = docSnap.data();
+    if (product.sold + Number(amount) > product.supply) {
+      return res.status(422).json({ message: "Insufficient product supply" });
+    }
+
+    await updateDoc(docRef, {
+      sold: increment(amount),
+    }).catch((e) => res.status(500).json({ message: e.message }));
+
+    // Create order
+    const ordersCol = collection(docRef, "orders");
+    const orderDocRef = await addDoc(ordersCol, {
       ...req.body,
       created: new Date().toISOString(),
-    })
-      .then(() => {
-        res.status(200).json({ success: true });
-      })
-      .catch((e) => {
-        res.status(500).json({ message: e.message });
-      });
+    }).catch((e) => res.status(500).json({ message: e.message }));
+
+    return res.status(200).json({ orderId: orderDocRef.id });
   }
 }

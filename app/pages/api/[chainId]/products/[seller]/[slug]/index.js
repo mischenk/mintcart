@@ -1,5 +1,4 @@
 import { collection, getDocs, query, where } from "firebase/firestore";
-import { useLayoutEffect } from "react";
 
 import { database } from "../../../../../../firebaseConfig";
 

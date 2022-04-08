@@ -42,10 +42,6 @@ const CheckoutContent = () => {
       value,
     });
     await tx.wait();
-
-    await axios.post(`/api/products/${product.id}/buy`, { amount: quantity });
-
-    setLoading(false);
   };
 
   if (!product && !loading) {
@@ -63,14 +59,14 @@ const CheckoutContent = () => {
 
     await buyProduct();
 
-    await axios.post(`/api/orders`, {
+    const orderId = await axios.post(`/api/orders`, {
       productId: product.id,
       email: email.value,
       name: name.value,
       amount: Number(quantity),
     });
 
-    location.reload();
+    router.push(`/order-summary/${product.id}/${orderId}`);
   };
 
   return (

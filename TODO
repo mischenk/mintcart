@@ -1,5 +1,4 @@
-fetch data from subgraph
-convert slug to bytes32
+
 
 orders
   +show order confirmation
@@ -12,7 +11,6 @@ products
   +edit product
   +delete product
   check slug uniqueness
-  +remove product factory contract
   add recipient
 
 profit-sharing
@@ -26,6 +24,8 @@ settings
   custom domain
 
 web3
+  fetch data from subgraph
   fix switch account event listener
   add wallet modal
   use signature request for log in
+  convert slug to bytes32
