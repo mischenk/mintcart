@@ -2,14 +2,43 @@ import {
   doc,
   collection,
   getDoc,
+  getDocs,
   updateDoc,
   addDoc,
   increment,
+  query,
+  where,
 } from "firebase/firestore";
 
-import { database } from "../../../firebaseConfig";
+import { database } from "../../../../../firebaseConfig";
 
 export default async function handler(req, res) {
+  if (req.method == "GET") {
+    const { chainId, seller } = req.query;
+    const ordersRef = collection(database, "orders");
+
+    const q = query(
+      ordersRef,
+      where("chainId", "==", Number(chainId)),
+      where("seller", "==", seller)
+    );
+
+    return getDocs(q)
+      .then((data) => {
+        const orders = data.docs.map((doc) => {
+          const docData = doc.data();
+          return {
+            ...docData,
+          };
+        });
+        res.status(200).json({
+          orders,
+        });
+      })
+      .catch((e) => {
+        res.status(500).json({ message: e.message });
+      });
+  }
   if (req.method == "POST") {
     const { productId, amount } = req.body;
 

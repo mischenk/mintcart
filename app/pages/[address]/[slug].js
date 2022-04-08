@@ -24,7 +24,7 @@ const CheckoutContent = () => {
   useEffect(() => {
     if (!chainId || !address || !slug) return;
 
-    axios.get(`/api/${chainId}/products/${address}/${slug}`).then((result) => {
+    axios.get(`/api/${chainId}/${address}/products/${slug}`).then((result) => {
       setProduct(result.data.product);
       setLoading(false);
     });
@@ -59,7 +59,7 @@ const CheckoutContent = () => {
 
     await buyProduct();
 
-    const order = await axios.post(`/api/orders`, {
+    const order = await axios.post(`/api/${chainId}/${address}/orders`, {
       productId: product.id,
       email: email.value,
       name: name.value,

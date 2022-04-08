@@ -2,7 +2,7 @@ import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-import { Web3Provider } from "../../../context/Web3Context";
+import { useChainId, Web3Provider } from "../../../context/Web3Context";
 
 import { BsCheckCircle } from "react-icons/bs";
 
@@ -11,20 +11,23 @@ import Loading from "../../../components/ui/Loading";
 
 const OrderSummaryContent = () => {
   const router = useRouter();
-  const { productId, id } = router.query;
+  const { seller, id } = router.query;
+
+  const chainId = useChainId();
+
   const [product, setProduct] = useState();
   const [order, setOrder] = useState();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!productId || !id) return;
+    if (!seller || !id) return;
 
-    axios.get(`/api/products/${productId}/orders/${id}`).then((result) => {
+    axios.get(`/api/${chainId}/${seller}/orders/${id}`).then((result) => {
       setProduct(result.data.product);
       setOrder(result.data.order);
       setLoading(false);
     });
-  }, [productId, id]);
+  }, [seller, id]);
 
   if (loading) {
     return <Loading />;

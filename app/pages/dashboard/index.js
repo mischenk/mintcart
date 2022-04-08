@@ -1,4 +1,3 @@
-import { useRouter } from "next/router";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import axios from "axios";
@@ -10,27 +9,31 @@ import {
   Web3Provider,
 } from "../../context/Web3Context";
 
-import { BsBoxArrowUpRight, BsXCircle } from "react-icons/bs";
-
 import Layout from "../../components/Layout";
 import Button from "../../components/ui/Button";
 import Loading from "../../components/ui/Loading";
+import ProductsTable from "../../components/ProductsTable";
+import OrdersTable from "../../components/OrdersTable";
 
 const DashboardContent = () => {
   const [products, setProducts] = useState([]);
+  const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const router = useRouter();
   const chainId = useChainId();
   const address = useAddress();
 
   useEffect(() => {
     if (!chainId || !address) return;
 
-    axios.get(`/api/${chainId}/products/${address}`).then((result) => {
-      setProducts(result.data.products);
-      setLoading(false);
-    });
+    Promise.all([
+      axios.get(`/api/${chainId}/${address}/products`).then((result) => {
+        setProducts(result.data.products);
+      }),
+      axios.get(`/api/${chainId}/${address}/orders`).then((result) => {
+        setOrders(result.data.orders);
+      }),
+    ]).then(() => setLoading(false));
   }, [chainId, address]);
 
   if (!address) {
@@ -42,51 +45,27 @@ const DashboardContent = () => {
   ) : (
     <div>
       <h2 className="mb-8 md:mb-16 font-bold text-2xl">Products</h2>
-      {products && products.length ? (
-        <table className="mb-8 w-full text-sm text-gray-700">
-          <thead>
-            <tr className="flex mb-4">
-              <th className="pr-4 grow text-left">Name</th>
-              <th className="pr-4 w-32 text-center">Price</th>
-              <th className="pr-4 w-32 text-center">Sold</th>
-              <th className="w-24"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((p) => (
-              <tr key={p.contract} className="flex border-b border-b-gray-300">
-                <td className="py-6 pr-4 grow">{p.name}</td>
-                <td className="w-32 py-6 pr-4  text-center">{p.price} eth</td>
-                <td className="w-32 py-6 pr-4  text-center">
-                  {p.sold}{" "}
-                  <span className="hidden sm:inline"> / {p.supply}</span>
-                </td>
-                <td className="px-4 w-24 flex items-center justify-end">
-                  <Link href={`/${p.seller}/${p.slug}`}>
-                    <a target="_blank" className="mr-4 ">
-                      <BsBoxArrowUpRight
-                        className="h-4 w-4"
-                        title="View checkout page"
-                      />
-                    </a>
-                  </Link>
+      <div className="mb-16">
+        {products && products.length ? (
+          <ProductsTable products={products} />
+        ) : (
+          <div className="mb-8 italic text-sm">
+            Create your first product...
+          </div>
+        )}
 
-                  <Link href="">
-                    <a>
-                      <BsXCircle className="h-4 w-4" title="Delete product" />
-                    </a>
-                  </Link>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : (
-        <div className="mb-8 italic text-sm">Create your first product...</div>
-      )}{" "}
-      <Link href="/products/create" passHref>
-        <Button>Create New Product</Button>
-      </Link>
+        <Link href="/products/create" passHref>
+          <Button>Create New Product</Button>
+        </Link>
+      </div>
+
+      {orders && orders.length > 0 && (
+        <>
+          <h2 className="mb-8 md:mb-16 font-bold text-2xl">Orders</h2>
+
+          <OrdersTable orders={orders} />
+        </>
+      )}
     </div>
   );
 };

@@ -1,4 +1,11 @@
-import { collection, getDocs, addDoc, query, where } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  getDoc,
+  addDoc,
+  query,
+  where,
+} from "firebase/firestore";
 
 import { database } from "../../../../../firebaseConfig";
 
@@ -6,6 +13,7 @@ export default function handler(req, res) {
   const { chainId, seller } = req.query;
   if (req.method == "GET") {
     const productsRef = collection(database, "products");
+
     const q = query(
       productsRef,
       where("chainId", "==", Number(chainId)),
@@ -17,9 +25,11 @@ export default function handler(req, res) {
         const products = data.docs.map((doc) => {
           const docData = doc.data();
           return {
+            id: doc.id,
             ...docData,
           };
         });
+
         res.status(200).json({
           products,
         });

@@ -1,6 +1,6 @@
 import { collection, getDocs, query, where } from "firebase/firestore";
 
-import { database } from "../../../../../../firebaseConfig";
+import { database } from "../../../../../firebaseConfig";
 
 export default function handler(req, res) {
   if (req.method == "GET") {

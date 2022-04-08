@@ -57,7 +57,7 @@ const CreateProductContent = () => {
     await tx.wait();
 
     // Save product data to db
-    await axios.post(`/api/${chainId}/products/${address}`, {
+    await axios.post(`/api/${chainId}/${address}/products`, {
       contract: contract.address,
       name: name.value,
       description: description.value,

@@ -1,7 +1,4 @@
-
-
 orders
-  +show order confirmation
   +orders list
   view order
   email order confirmation
