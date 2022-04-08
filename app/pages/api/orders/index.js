@@ -29,7 +29,7 @@ export default async function handler(req, res) {
     }).catch((e) => res.status(500).json({ message: e.message }));
 
     // Create order
-    const ordersCol = collection(docRef, "orders");
+    const ordersCol = collection(database, "orders");
     const orderDocRef = await addDoc(ordersCol, {
       ...req.body,
       created: new Date().toISOString(),
