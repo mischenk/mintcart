@@ -15,6 +15,7 @@ import {
 
 import Layout from "../../components/Layout";
 import Loading from "../../components/ui/Loading";
+import ConnectWallet from "../../components/ConnectWallet";
 import Label from "../../components/ui/Label";
 import Input from "../../components/ui/Input";
 import Textarea from "../../components/ui/Textarea";
@@ -70,6 +71,10 @@ const CreateProductContent = () => {
 
     router.push("/dashboard");
   };
+
+  if (!address) {
+    return <ConnectWallet />;
+  }
 
   return loading ? (
     <Loading />
