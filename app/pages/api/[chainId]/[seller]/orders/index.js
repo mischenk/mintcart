@@ -13,14 +13,15 @@ import {
 import { database } from "../../../../../firebaseConfig";
 
 export default async function handler(req, res) {
+  const { chainId, seller } = req.query;
+
   if (req.method == "GET") {
-    const { chainId, seller } = req.query;
     const ordersRef = collection(database, "orders");
 
     const q = query(
       ordersRef,
       where("chainId", "==", Number(chainId)),
-      where("seller", "==", seller)
+      where("seller", "==", seller.toLowerCase())
     );
 
     return getDocs(q)
@@ -61,6 +62,8 @@ export default async function handler(req, res) {
     const ordersCol = collection(database, "orders");
     const orderDocRef = await addDoc(ordersCol, {
       ...req.body,
+      seller,
+      chainId: Number(chainId),
       created: new Date().toISOString(),
     }).catch((e) => res.status(500).json({ message: e.message }));
 
