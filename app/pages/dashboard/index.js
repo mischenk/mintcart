@@ -37,7 +37,6 @@ const DashboardContent = () => {
           ...o,
         }))
       );
-
       setLoading(false);
     });
   }, [chainId, address]);
@@ -65,9 +64,14 @@ const DashboardContent = () => {
         </>
       ) : (
         <div className="flex flex-col items-center justify-center  md:h-96">
-          <h2 className="mb-8 text-2xl font-semibold">Dashboard</h2>
+          <h2 className="mb-4 text-3xl font-semibold max-w-4xl	text-center">
+            Dashboard
+          </h2>
+          <p className="mb-6 max-w-2xl text-center">
+            Create your first product to get started.
+          </p>
           <Link href="/products/create" passHref>
-            <Button>Create your first product</Button>
+            <Button>Create product</Button>
           </Link>
         </div>
       )}
