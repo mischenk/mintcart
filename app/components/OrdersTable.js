@@ -1,3 +1,5 @@
+import { format, parseISO } from "date-fns";
+
 const OrdersTable = ({ orders }) => {
   return (
     <table className="mb-8 w-full text-sm text-gray-700">
@@ -17,7 +19,9 @@ const OrdersTable = ({ orders }) => {
             <td className="py-6 pr-4 grow">{o.name}</td>
             <td className="py-6 pr-4 grow">{o.product.name}</td>
             <td className="w-32 py-6 pr-4  text-center">{o.amount}</td>
-            <td className="w-32 py-6 pr-4  text-center">{o.created}</td>
+            <td className="w-32 py-6 pr-4  text-center">
+              {format(parseISO(o.created), "MMM dd, yyyy")}
+            </td>
           </tr>
         ))}
       </tbody>
