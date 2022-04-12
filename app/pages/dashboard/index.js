@@ -27,13 +27,19 @@ const DashboardContent = () => {
     if (!chainId || !address) return;
 
     Promise.all([
-      axios.get(`/api/${chainId}/${address}/products`).then((result) => {
-        setProducts(result.data.products);
-      }),
-      axios.get(`/api/${chainId}/${address}/orders`).then((result) => {
-        setOrders(result.data.orders);
-      }),
-    ]).then(() => setLoading(false));
+      axios.get(`/api/${chainId}/${address}/products`),
+      axios.get(`/api/${chainId}/${address}/orders`),
+    ]).then(([resProducts, resOrders]) => {
+      setProducts(resProducts.data.products);
+      setOrders(
+        resOrders.data.orders.map((o) => ({
+          product: resProducts.data.products.find((p) => p.id == o.productId),
+          ...o,
+        }))
+      );
+
+      setLoading(false);
+    });
   }, [chainId, address]);
 
   if (!address) {
@@ -44,7 +50,13 @@ const DashboardContent = () => {
     <Loading />
   ) : (
     <div>
-      <h2 className="mb-8 md:mb-16 font-bold text-2xl">Products</h2>
+      <div className="mb-8 md:mb-16 flex w-full items-center">
+        <h2 className="grow font-bold text-2xl">Products</h2>
+        <Link href="/products/create" passHref>
+          <Button>Create Product</Button>
+        </Link>
+      </div>
+
       <div className="mb-16">
         {products && products.length ? (
           <ProductsTable products={products} />
@@ -53,10 +65,6 @@ const DashboardContent = () => {
             Create your first product...
           </div>
         )}
-
-        <Link href="/products/create" passHref>
-          <Button>Create New Product</Button>
-        </Link>
       </div>
 
       {orders && orders.length > 0 && (
