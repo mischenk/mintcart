@@ -1,12 +1,12 @@
 orders
-  +orders list
+  move orders list to separate page
   view order
   email order confirmation
 
 products
   +add product image
   +edit product
-  +delete product
+  +archive product
   check slug uniqueness
   add recipient
 
