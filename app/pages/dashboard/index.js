@@ -50,22 +50,27 @@ const DashboardContent = () => {
     <Loading />
   ) : (
     <div>
-      <div className="mb-8 md:mb-16 flex w-full items-center">
-        <h2 className="grow font-bold text-2xl">Products</h2>
-        <Link href="/products/create" passHref>
-          <Button>Create Product</Button>
-        </Link>
-      </div>
-
-      <div className="mb-16">
-        {products && products.length ? (
-          <ProductsTable products={products} />
-        ) : (
-          <div className="mb-8 italic text-sm">
-            Create your first product...
+      {products && products.length ? (
+        <>
+          <div className="mb-8 md:mb-16 flex w-full items-center">
+            <h2 className="grow font-bold text-2xl">Products</h2>
+            <Link href="/products/create" passHref>
+              <Button>Create Product</Button>
+            </Link>
           </div>
-        )}
-      </div>
+
+          <div className="mb-16">
+            <ProductsTable products={products} />
+          </div>
+        </>
+      ) : (
+        <div className="flex flex-col items-center justify-center  md:h-96">
+          <h2 className="mb-8 text-2xl font-semibold">Dashboard</h2>
+          <Link href="/products/create" passHref>
+            <Button>Create your first product</Button>
+          </Link>
+        </div>
+      )}
 
       {orders && orders.length > 0 && (
         <>

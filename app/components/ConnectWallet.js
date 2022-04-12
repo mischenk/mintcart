@@ -7,7 +7,7 @@ const ConnectWallet = () => {
 
   return (
     <Web3Provider>
-      <div className="flex items-center justify-center flex-col h-[calc(100vh-232px)]">
+      <div className="flex items-center justify-center flex-col md:h-96">
         <h2 className="mb-4  text-4xl font-bold max-w-4xl	text-center">
           Connect
         </h2>

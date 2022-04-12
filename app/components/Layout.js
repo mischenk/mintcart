@@ -44,7 +44,7 @@ const Layout = ({ children }) => {
           )}
         </div>
       </header>
-      <main className="flex grow shrink flex-col md:pt-8 mx-auto max-w-5xl ">
+      <main className="flex grow shrink flex-col md:pt-8 mx-auto max-w-5xl">
         {children}
       </main>
     </div>
