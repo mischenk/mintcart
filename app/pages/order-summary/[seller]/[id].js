@@ -54,7 +54,9 @@ const OrderSummaryContent = () => {
           <div className="grow">
             {order.amount} x {product.name}
           </div>
-          <div>{Number(product.price) * Number(order.amount)} eth</div>
+          <div className="font-semibold">
+            {Number(product.price) * Number(order.amount)} eth
+          </div>
         </div>
       </section>
     </div>

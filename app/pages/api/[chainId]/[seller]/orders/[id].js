@@ -25,8 +25,15 @@ export default async function handler(req, res) {
 
     const order = orderSnap.data();
 
+    const productRef = doc(database, "products", order.productId);
+    const productSnap = await getDoc(productRef).catch((e) =>
+      res.status(500).json({ message: e.message })
+    );
+    const product = productSnap.data();
+
     res.status(200).json({
       order,
+      product,
     });
   }
 }
