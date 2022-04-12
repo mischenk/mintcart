@@ -5,22 +5,22 @@ const ProductsTable = ({ products }) => {
   return (
     <table className="mb-8 w-full text-sm text-gray-700">
       <thead>
-        <tr className="flex mb-4">
-          <th className="pr-4 grow text-left">Name</th>
-          <th className="pr-4 w-32 text-center">Price</th>
-          <th className="pr-4 w-32 text-center">Sold</th>
+        <tr className="mb-4">
+          <th className="pr-4 text-left">Name</th>
+          <th className="pr-4 w-32 text-left">Price</th>
+          <th className="pr-4 w-32 text-left">Sold</th>
           <th className="w-24"></th>
         </tr>
       </thead>
       <tbody>
         {products.map((p) => (
-          <tr key={p.id} className="flex border-b border-b-gray-300">
-            <td className="py-6 pr-4 grow">{p.name}</td>
-            <td className="w-32 py-6 pr-4  text-center">{p.price} eth</td>
-            <td className="w-32 py-6 pr-4  text-center">
+          <tr key={p.id} className=" border-b border-b-gray-300">
+            <td className="py-8 pr-4">{p.name}</td>
+            <td className="w-32 py-8 pr-4">{p.price} eth</td>
+            <td className="w-32 py-8 pr-4">
               {p.sold} <span className="hidden sm:inline"> / {p.supply}</span>
             </td>
-            <td className="px-4 w-24 flex items-center justify-end">
+            <td className="px-4 py-8 w-24 flex justify-end">
               <Link href={`/${p.seller}/${p.slug}`}>
                 <a target="_blank" className="mr-4 ">
                   <BsBoxArrowUpRight
