@@ -6,7 +6,12 @@ import { ethers } from "ethers";
 import Loading from "../../components/ui/Loading";
 
 import { getProductContract } from "../../utils";
-import { Web3Provider, useSigner, useChainId } from "../../context/Web3Context";
+import {
+  Web3Provider,
+  useSigner,
+  useChainId,
+  useAddress,
+} from "../../context/Web3Context";
 
 import SimpleLayout from "../../components/SimpleLayout";
 import Button from "../../components/ui/Button";
@@ -17,6 +22,7 @@ const CheckoutContent = () => {
   const [loading, setLoading] = useState(true);
   const chainId = useChainId();
   const signer = useSigner();
+  const buyer = useAddress();
   const router = useRouter();
 
   const { address, slug } = router.query;
@@ -55,15 +61,12 @@ const CheckoutContent = () => {
   const placeOrder = async (e) => {
     e.preventDefault();
 
-    const { email, name } = e.target;
-
     await buyProduct();
 
     const order = await axios.post(`/api/${chainId}/${address}/orders`, {
       productId: product.id,
-      email: email.value,
-      name: name.value,
       amount: Number(quantity),
+      buyer,
     });
 
     router.push(`/order-summary/${product.id}/${order.data.orderId}`);
@@ -90,23 +93,6 @@ const CheckoutContent = () => {
         ) : null}
       </>
 
-      <div className="flex flex-wrap mb-8">
-        <input
-          className="mb-4 p-2 border border-slate-500 text-base w-full"
-          type="email"
-          name="email"
-          placeholder="Email Address"
-          required
-        />
-        <input
-          className="mb-4 p-2 border border-slate-500 text-base w-full"
-          type="text"
-          name="name"
-          placeholder="Full Name"
-          required
-        />
-      </div>
-
       <div className="flex mb-4 text-xl">
         <div className="flex flex-col align-center w-full">Total</div>
         <div className="flex grow justify-end align-center font-bold">
@@ -116,7 +102,7 @@ const CheckoutContent = () => {
       </div>
 
       {product.sold < product.supply ? (
-        <div className="flex space-between">
+        <div className="flex justify-between">
           <input
             className="mr-4 py-2 pr-2 pl-4 center border border-black w-24 h-10 text-center text-sm"
             type="number"
@@ -126,7 +112,7 @@ const CheckoutContent = () => {
             required
             onChange={(e) => setQuantity(parseInt(e.target.value))}
           />
-          <Button className="w-full">Place your order</Button>
+          <Button className="px-12">Buy</Button>
         </div>
       ) : (
         <Button disabled>Sold out</Button>

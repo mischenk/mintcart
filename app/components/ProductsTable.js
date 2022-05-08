@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BsBoxArrowUpRight, BsXCircle } from "react-icons/bs";
+import { BsBoxArrowUpRight } from "react-icons/bs";
 
 const ProductsTable = ({ products }) => {
   return (
@@ -7,32 +7,26 @@ const ProductsTable = ({ products }) => {
       <thead>
         <tr className="mb-4">
           <th className="pr-4 text-left">Name</th>
-          <th className="pr-4 w-32 text-left">Price</th>
-          <th className="pr-4 w-32 text-left">Sold</th>
-          <th className="w-24"></th>
+          <th className="pr-4 w-20 text-center">Price</th>
+          <th className="pr-4 w-12 md:w-20 text-center">Sold</th>
+          <th className="w-4"></th>
         </tr>
       </thead>
       <tbody>
-        {products.map((p) => (
-          <tr key={p.id} className=" border-b border-b-gray-300">
+        {products.map((p, i) => (
+          <tr key={i} className=" border-b border-b-gray-300">
             <td className="py-8 pr-4">{p.name}</td>
-            <td className="w-32 py-8 pr-4">{p.price} eth</td>
-            <td className="w-32 py-8 pr-4">
+            <td className="py-8 pr-4 text-center">{p.price} eth</td>
+            <td className="py-8 pr-4 text-center">
               {p.sold} <span className="hidden sm:inline"> / {p.supply}</span>
             </td>
-            <td className="px-4 py-8 w-24 flex justify-end">
+            <td className="pr-4 py-8 flex justify-end">
               <Link href={`/${p.seller}/${p.slug}`}>
                 <a target="_blank" className="mr-4 ">
                   <BsBoxArrowUpRight
                     className="h-4 w-4"
                     title="View checkout page"
                   />
-                </a>
-              </Link>
-
-              <Link href="">
-                <a>
-                  <BsXCircle className="h-4 w-4" title="Delete product" />
                 </a>
               </Link>
             </td>

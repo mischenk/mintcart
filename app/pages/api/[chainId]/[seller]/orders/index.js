@@ -41,7 +41,7 @@ export default async function handler(req, res) {
       });
   }
   if (req.method == "POST") {
-    const { productId, amount } = req.body;
+    const { productId, amount, buyer } = req.body;
 
     const docRef = doc(database, "products", productId);
     const docSnap = await getDoc(docRef);
@@ -63,6 +63,7 @@ export default async function handler(req, res) {
     const orderDocRef = await addDoc(ordersCol, {
       ...req.body,
       seller,
+      buyer,
       chainId: Number(chainId),
       created: new Date().toISOString(),
     }).catch((e) => res.status(500).json({ message: e.message }));

@@ -2,7 +2,7 @@ import { TailSpin } from "react-loader-spinner";
 
 const Loading = () => {
   return (
-    <div className="w-full h-full flex align-center justify-center">
+    <div className="absolute top-0 bottom-0 right-0 left-0 flex items-center justify-center">
       <TailSpin
         ariaLabel="loading-indicator"
         color="#111"

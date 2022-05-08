@@ -24,7 +24,7 @@ const Layout = ({ children }) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <header className="mb-8 p-8 md:p-16  flex items-center justify-between h-16 bg-slate-100 border-b border-gray-300">
+      <header className="mb-8 py-12 px-4 md:p-16  flex items-center justify-between h-16 bg-slate-100 border-b border-gray-300">
         <h1 className="font-semibold font-mono text-2xl leading-10">
           <Link href="/">
             <a>mintcart</a>
@@ -44,7 +44,7 @@ const Layout = ({ children }) => {
           )}
         </div>
       </header>
-      <main className="flex grow shrink flex-col md:pt-8 mx-auto max-w-5xl">
+      <main className="flex grow shrink flex-col px-4 pb-4 md:py-8 mx-auto max-w-5xl">
         {children}
       </main>
     </div>

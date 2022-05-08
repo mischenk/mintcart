@@ -54,13 +54,17 @@ const DashboardContent = () => {
           <div className="mb-8 md:mb-16 flex w-full items-center">
             <h2 className="grow font-bold text-2xl">Products</h2>
             <Link href="/products/create" passHref>
-              <Button>Create Product</Button>
+              <Button className="hidden md:block">Create Product</Button>
             </Link>
           </div>
 
-          <div className="mb-16">
+          <div className="md:mb-16">
             <ProductsTable products={products} />
           </div>
+
+          <Link href="/products/create" passHref>
+            <Button className="mb-16 block md:hidden">Create Product</Button>
+          </Link>
         </>
       ) : (
         <div className="flex flex-col items-center justify-center  md:h-96">
@@ -78,7 +82,7 @@ const DashboardContent = () => {
 
       {orders && orders.length > 0 && (
         <>
-          <h2 className="mb-8 md:mb-16 font-bold text-2xl">Orders</h2>
+          <h2 className="mb-8 md:mb-16 font-bold text-2xl">Sales</h2>
 
           <OrdersTable orders={orders} />
         </>
